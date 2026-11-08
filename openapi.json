@@ -1,0 +1,2028 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "operationId": "AppController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/HealthCheckDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Health check endpoint to verify server status",
+        "tags": [
+          "System & Health"
+        ]
+      }
+    },
+    "/api/v1/navigation/destinations": {
+      "get": {
+        "operationId": "NavigationController_getDestinations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/DestinationDto"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get list of available indoor rooms and destinations",
+        "tags": [
+          "Indoor Navigation"
+        ]
+      }
+    },
+    "/api/v1/navigation/route": {
+      "post": {
+        "description": "Returns voice-guided route instructions. Allowed QR codes: QR_ENTRANCE_01, QR_HALLWAY_A, QR_ELEVATOR_01, QR_STAIRS_EAST. Fake test triggers: currentQrCode=\"invalid\" -> ERR_INVALID_QR_CODE, currentQrCode=\"notfound\" -> ERR_QR_NOT_FOUND, destinationId not in destinations list -> ERR_DESTINATION_NOT_FOUND, destinationId=\"routeerror\" -> ERR_ROUTE_CALCULATION_FAILED.",
+        "operationId": "NavigationController_calculateRoute",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CalculateRouteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/NavigationRouteDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INVALID_QR_CODE": {
+                    "summary": "ERR_INVALID_QR_CODE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_INVALID_QR_CODE",
+                      "message": "كود الـ QR غير صالح أو تالف",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_QR_NOT_FOUND": {
+                    "summary": "ERR_QR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_QR_NOT_FOUND",
+                      "message": "لم يتم العثور على أي كود QR في الإطار",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_DESTINATION_NOT_FOUND": {
+                    "summary": "ERR_DESTINATION_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_DESTINATION_NOT_FOUND",
+                      "message": "المكان أو الوجهة المطلوبة غير مسجلة بالنظام",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_ROUTE_CALCULATION_FAILED": {
+                    "summary": "ERR_ROUTE_CALCULATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_ROUTE_CALCULATION_FAILED",
+                      "message": "تعذر حساب المسار إلى الوجهة المطلوبة",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Calculate step-by-step path from current QR code to target destination ID",
+        "tags": [
+          "Indoor Navigation"
+        ]
+      }
+    },
+    "/api/v1/ocr/read": {
+      "post": {
+        "description": "Extracts text from Base64 image payload. Fake test triggers: pass imageBase64 as \"blurry\", \"dark\", \"notext\", \"unsupported\", or \"toolarge\".",
+        "operationId": "OcrController_readDocument",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/OcrResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_FILE_TOO_LARGE": {
+                    "summary": "ERR_FILE_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_FILE_TOO_LARGE",
+                      "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_IMAGE_BLURRY": {
+                    "summary": "ERR_IMAGE_BLURRY",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_BLURRY",
+                      "message": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_IMAGE_TOO_DARK": {
+                    "summary": "ERR_IMAGE_TOO_DARK",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_TOO_DARK",
+                      "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_NO_TEXT_DETECTED": {
+                    "summary": "ERR_NO_TEXT_DETECTED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_NO_TEXT_DETECTED",
+                      "message": "لم يتم العثور على أي نص في الصورة الملتقطة",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_UNSUPPORTED_IMAGE_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                      "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Read text from captured image (Prescription, Menu, Sign)",
+        "tags": [
+          "OCR & Documents"
+        ]
+      }
+    },
+    "/api/v1/voice/command": {
+      "post": {
+        "description": "Maps spoken text to system intents and mobile triggers. If the phrase is unrecognized, throws ERR_INTENT_NOT_RECOGNIZED.",
+        "operationId": "VoiceController_processCommand",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoiceCommandDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/VoiceCommandResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTENT_NOT_RECOGNIZED": {
+                    "summary": "ERR_INTENT_NOT_RECOGNIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_INTENT_NOT_RECOGNIZED",
+                      "message": "عذراً، لم أفهم طلبك، يرجى المحاولة بصيغة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Process colloquial Egyptian voice command and return intent",
+        "tags": [
+          "Voice Assistant"
+        ]
+      }
+    },
+    "/api/v1/vision/describe": {
+      "post": {
+        "description": "Provides full Arabic contextual description of surroundings. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "operationId": "VisionController_describeScene",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SceneDescriptionDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_FILE_TOO_LARGE": {
+                    "summary": "ERR_FILE_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_FILE_TOO_LARGE",
+                      "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_IMAGE_BLURRY": {
+                    "summary": "ERR_IMAGE_BLURRY",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_BLURRY",
+                      "message": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_IMAGE_TOO_DARK": {
+                    "summary": "ERR_IMAGE_TOO_DARK",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_TOO_DARK",
+                      "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_UNSUPPORTED_IMAGE_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                      "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Describe objects and general scene in front of user",
+        "tags": [
+          "Computer Vision"
+        ]
+      }
+    },
+    "/api/v1/vision/currency": {
+      "post": {
+        "description": "Identifies Egyptian banknotes with value and verbal announcement. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "operationId": "VisionController_recognizeCurrency",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CurrencyResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_FILE_TOO_LARGE": {
+                    "summary": "ERR_FILE_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_FILE_TOO_LARGE",
+                      "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_IMAGE_BLURRY": {
+                    "summary": "ERR_IMAGE_BLURRY",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_BLURRY",
+                      "message": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_IMAGE_TOO_DARK": {
+                    "summary": "ERR_IMAGE_TOO_DARK",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_TOO_DARK",
+                      "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_UNSUPPORTED_IMAGE_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                      "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Recognize Egyptian currency banknotes",
+        "tags": [
+          "Computer Vision"
+        ]
+      }
+    },
+    "/api/v1/vision/color": {
+      "post": {
+        "description": "Extracts dominant color name in Arabic and English with confidence score. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "operationId": "VisionController_detectColor",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ColorResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_FILE_TOO_LARGE": {
+                    "summary": "ERR_FILE_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_FILE_TOO_LARGE",
+                      "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_IMAGE_BLURRY": {
+                    "summary": "ERR_IMAGE_BLURRY",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_BLURRY",
+                      "message": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_IMAGE_TOO_DARK": {
+                    "summary": "ERR_IMAGE_TOO_DARK",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_TOO_DARK",
+                      "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_UNSUPPORTED_IMAGE_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                      "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Detect dominant color of target object",
+        "tags": [
+          "Computer Vision"
+        ]
+      }
+    },
+    "/api/v1/vision/traffic-signs": {
+      "post": {
+        "description": "Identifies pedestrian and street traffic safety signs. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "operationId": "VisionController_recognizeTrafficSign",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TrafficSignResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_FILE_TOO_LARGE": {
+                    "summary": "ERR_FILE_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_FILE_TOO_LARGE",
+                      "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_IMAGE_BLURRY": {
+                    "summary": "ERR_IMAGE_BLURRY",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_BLURRY",
+                      "message": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_IMAGE_TOO_DARK": {
+                    "summary": "ERR_IMAGE_TOO_DARK",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_TOO_DARK",
+                      "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_UNSUPPORTED_IMAGE_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                      "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Recognize street traffic signs",
+        "tags": [
+          "Computer Vision"
+        ]
+      }
+    },
+    "/api/v1/vision/face-expression": {
+      "post": {
+        "description": "Detects emotions and facial expressions for social awareness. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "operationId": "VisionController_detectFaceExpression",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/FaceExpressionResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_FILE_TOO_LARGE": {
+                    "summary": "ERR_FILE_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_FILE_TOO_LARGE",
+                      "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_IMAGE_BLURRY": {
+                    "summary": "ERR_IMAGE_BLURRY",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_BLURRY",
+                      "message": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_IMAGE_TOO_DARK": {
+                    "summary": "ERR_IMAGE_TOO_DARK",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_TOO_DARK",
+                      "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_UNSUPPORTED_IMAGE_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                      "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Detect facial expressions of person in frame",
+        "tags": [
+          "Computer Vision"
+        ]
+      }
+    },
+    "/api/v1/vision/obstacles": {
+      "post": {
+        "description": "Warns of immediate physical dangers (stairs, holes, poles) with distance and haptic pattern. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "operationId": "VisionController_detectObstacles",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImageInputDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ObstacleResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_FILE_TOO_LARGE": {
+                    "summary": "ERR_FILE_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_FILE_TOO_LARGE",
+                      "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_IMAGE_BLURRY": {
+                    "summary": "ERR_IMAGE_BLURRY",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_BLURRY",
+                      "message": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_IMAGE_TOO_DARK": {
+                    "summary": "ERR_IMAGE_TOO_DARK",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_IMAGE_TOO_DARK",
+                      "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_UNSUPPORTED_IMAGE_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+                      "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Real-time obstacle tracking and safety alert",
+        "tags": [
+          "Computer Vision"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Baseer API - بصـير",
+    "description": "API Contract & Mock Documentation for Baseer assistive mobile application",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [
+    {
+      "name": "System & Health",
+      "description": "Server health and monitoring"
+    },
+    {
+      "name": "OCR & Documents",
+      "description": "Reading documents and short printed text"
+    },
+    {
+      "name": "Indoor Navigation",
+      "description": "QR-based pathfinding and routing"
+    },
+    {
+      "name": "Voice Assistant",
+      "description": "Speech commands and Arabic intent detection"
+    },
+    {
+      "name": "Computer Vision",
+      "description": "Object, Currency, Color, Signs, and Faces"
+    }
+  ],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "SuccessResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 200
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-11-06T14:30:00.000Z"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "timestamp"
+        ]
+      },
+      "HealthCheckDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok",
+            "description": "System health status"
+          },
+          "message": {
+            "type": "string",
+            "example": "Baseer API is healthy and operational",
+            "description": "Status description message"
+          }
+        },
+        "required": [
+          "status",
+          "message"
+        ]
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 400
+          },
+          "errorCode": {
+            "type": "string",
+            "enum": [
+              "ERR_INTERNAL_SERVER_ERROR",
+              "ERR_VALIDATION_FAILED",
+              "ERR_UNAUTHORIZED",
+              "ERR_FORBIDDEN",
+              "ERR_NOT_FOUND",
+              "ERR_BAD_REQUEST",
+              "ERR_FILE_TOO_LARGE",
+              "ERR_TOO_MANY_REQUESTS",
+              "ERR_SERVICE_UNAVAILABLE",
+              "ERR_IMAGE_BLURRY",
+              "ERR_IMAGE_TOO_DARK",
+              "ERR_NO_TEXT_DETECTED",
+              "ERR_UNSUPPORTED_IMAGE_FORMAT",
+              "ERR_INTENT_NOT_RECOGNIZED",
+              "ERR_QR_NOT_FOUND",
+              "ERR_INVALID_QR_CODE",
+              "ERR_DESTINATION_NOT_FOUND",
+              "ERR_ROUTE_CALCULATION_FAILED"
+            ],
+            "example": "ERR_VALIDATION_FAILED"
+          },
+          "message": {
+            "type": "string",
+            "example": "بيانات الطلب غير صالحة"
+          },
+          "details": {
+            "example": [
+              "field must be a string"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "example": "2026-11-06T14:30:00.000Z"
+          }
+        },
+        "required": [
+          "success",
+          "statusCode",
+          "errorCode",
+          "message",
+          "timestamp"
+        ]
+      },
+      "DestinationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "dept-affairs",
+            "description": "Unique identifier of destination point of interest"
+          },
+          "name": {
+            "type": "string",
+            "example": "مكتب شؤون الطلبة",
+            "description": "Human-readable Arabic destination name"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "NavigationRouteDto": {
+        "type": "object",
+        "properties": {
+          "startLocation": {
+            "type": "string",
+            "example": "المدخل الرئيسي - بوابة رقم 1",
+            "description": "Human-readable starting point name detected from QR code"
+          },
+          "targetDestination": {
+            "type": "string",
+            "example": "مكتب شؤون الطلبة",
+            "description": "Human-readable Arabic destination name"
+          },
+          "destinationId": {
+            "type": "string",
+            "example": "dept-affairs",
+            "description": "Target destination unique identifier"
+          },
+          "estimatedDistanceMeters": {
+            "type": "number",
+            "example": 30,
+            "description": "Estimated distance in meters to target destination"
+          },
+          "totalSteps": {
+            "type": "number",
+            "example": 3,
+            "description": "عدد الخطوات الإرشادية في المسار (Number of instructional guidance steps in route)"
+          },
+          "voiceInstructions": {
+            "example": [
+              "تحرك للأمام 10 خطوات مستقيماً",
+              "استدر يميناً عند الممر الرئيسي",
+              "وجهتك هي الباب الثاني على يسارك (شؤون الطلبة)"
+            ],
+            "description": "Sequential voice guidance instructions in Arabic",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "startLocation",
+          "targetDestination",
+          "destinationId",
+          "estimatedDistanceMeters",
+          "totalSteps",
+          "voiceInstructions"
+        ]
+      },
+      "CalculateRouteDto": {
+        "type": "object",
+        "properties": {
+          "currentQrCode": {
+            "type": "string",
+            "example": "QR_ENTRANCE_01",
+            "description": "Current scanned QR code identifier. Allowed QR codes: QR_ENTRANCE_01, QR_HALLWAY_A, QR_ELEVATOR_01, QR_STAIRS_EAST. Fake test triggers: \"invalid\" -> ERR_INVALID_QR_CODE, \"notfound\" -> ERR_QR_NOT_FOUND."
+          },
+          "destinationId": {
+            "type": "string",
+            "example": "dept-affairs",
+            "description": "Target destination ID (from GET /destinations). Fake test triggers: \"invalid\" -> ERR_DESTINATION_NOT_FOUND, \"routeerror\" -> ERR_ROUTE_CALCULATION_FAILED."
+          }
+        },
+        "required": [
+          "currentQrCode",
+          "destinationId"
+        ]
+      },
+      "OcrResultDto": {
+        "type": "object",
+        "properties": {
+          "detectedLanguage": {
+            "type": "string",
+            "example": "en",
+            "description": "Detected language code (e.g. \"ar\", \"en\")"
+          },
+          "extractedText": {
+            "type": "string",
+            "example": "Panadol Extra 500mg - Take 2 tablets every 8 hours after meals.",
+            "description": "Raw extracted text from the image"
+          },
+          "arabicSimplifiedText": {
+            "type": "string",
+            "example": "بنادول إكسترا 500 مجم - قرصين كل 8 ساعات بعد الأكل",
+            "description": "Simplified Arabic spoken text tailored for text-to-speech"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.96,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "OCR model confidence score (0 to 1)"
+          }
+        },
+        "required": [
+          "detectedLanguage",
+          "extractedText",
+          "arabicSimplifiedText",
+          "confidence"
+        ]
+      },
+      "ImageInputDto": {
+        "type": "object",
+        "properties": {
+          "imageBase64": {
+            "type": "string",
+            "example": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
+            "description": "Base64 encoded image string (JPEG/PNG). Testing fake triggers: send \"blurry\" for ERR_IMAGE_BLURRY, \"dark\" for ERR_IMAGE_TOO_DARK, \"notext\" for ERR_NO_TEXT_DETECTED (OCR only), \"unsupported\" for ERR_UNSUPPORTED_IMAGE_FORMAT, or \"toolarge\" for ERR_FILE_TOO_LARGE."
+          }
+        },
+        "required": [
+          "imageBase64"
+        ]
+      },
+      "VoiceCommandResultDto": {
+        "type": "object",
+        "properties": {
+          "userInput": {
+            "type": "string",
+            "example": "شوفلي الورقة دي مكتوب فيها إيه",
+            "description": "Original user speech query"
+          },
+          "detectedIntent": {
+            "type": "string",
+            "enum": [
+              "READ_DOCUMENT",
+              "RECOGNIZE_CURRENCY",
+              "INDOOR_NAVIGATION",
+              "DESCRIBE_SCENE",
+              "DETECT_COLOR",
+              "READ_TRAFFIC_SIGN",
+              "DETECT_OBSTACLE",
+              "DETECT_EXPRESSION"
+            ],
+            "example": "READ_DOCUMENT",
+            "description": "Classified user intent"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.94,
+            "description": "Confidence score of intent classification (0 to 1)"
+          },
+          "spokenResponse": {
+            "type": "string",
+            "example": "تمام، وجه الكاميرا نحو الورقة وسأقرأها لك حالاً",
+            "description": "Spoken confirmation in Egyptian Arabic for text-to-speech"
+          },
+          "actionToTriggerOnMobile": {
+            "type": "string",
+            "enum": [
+              "OPEN_CAMERA_OCR",
+              "OPEN_CAMERA_CURRENCY",
+              "OPEN_CAMERA_QR",
+              "OPEN_CAMERA_DESCRIBE",
+              "OPEN_CAMERA_COLOR",
+              "OPEN_CAMERA_TRAFFIC_SIGN",
+              "OPEN_CAMERA_OBSTACLE",
+              "OPEN_CAMERA_EXPRESSION"
+            ],
+            "example": "OPEN_CAMERA_OCR",
+            "description": "Specific mobile screen or camera mode to automatically trigger"
+          }
+        },
+        "required": [
+          "userInput",
+          "detectedIntent",
+          "confidence",
+          "spokenResponse",
+          "actionToTriggerOnMobile"
+        ]
+      },
+      "VoiceCommandDto": {
+        "type": "object",
+        "properties": {
+          "userSpeech": {
+            "type": "string",
+            "example": "شوفلي الورقة دي مكتوب فيها إيه",
+            "description": "Colloquial Egyptian Arabic transcript. Fake test trigger: send \"unrecognized\" or unsupported words to test ERR_INTENT_NOT_RECOGNIZED."
+          }
+        },
+        "required": [
+          "userSpeech"
+        ]
+      },
+      "SceneDescriptionDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "أمامك طاولة خشبية عليها زجاجة ماء ومفتاح، وعلى يمينك مقعد فارغ",
+            "description": "Natural Arabic scene narration for text-to-speech"
+          },
+          "detectedObjects": {
+            "example": [
+              "table",
+              "bottle",
+              "key",
+              "chair"
+            ],
+            "description": "List of detected object labels",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.92,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Overall vision detection confidence score (0 to 1)"
+          }
+        },
+        "required": [
+          "description",
+          "detectedObjects",
+          "confidence"
+        ]
+      },
+      "CurrencyResultDto": {
+        "type": "object",
+        "properties": {
+          "denomination": {
+            "type": "number",
+            "enum": [
+              5,
+              10,
+              20,
+              50,
+              100,
+              200
+            ],
+            "example": 50,
+            "description": "Banknote numerical denomination value (5, 10, 20, 50, 100, 200)"
+          },
+          "currency": {
+            "type": "string",
+            "example": "EGP",
+            "description": "Currency ISO code"
+          },
+          "spokenAnnouncement": {
+            "type": "string",
+            "example": "خمسون جنيهاً مصرياً",
+            "description": "Arabic spoken announcement"
+          },
+          "condition": {
+            "type": "string",
+            "example": "New Banknote",
+            "description": "Physical condition or banknote series note"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.98,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Classification confidence score (0 to 1)"
+          }
+        },
+        "required": [
+          "denomination",
+          "currency",
+          "spokenAnnouncement",
+          "condition",
+          "confidence"
+        ]
+      },
+      "ColorResultDto": {
+        "type": "object",
+        "properties": {
+          "colorNameArabic": {
+            "type": "string",
+            "example": "أزرق داكن",
+            "description": "Detected color name in Arabic"
+          },
+          "colorNameEnglish": {
+            "type": "string",
+            "example": "Dark Blue",
+            "description": "Detected color name in English"
+          },
+          "hexCode": {
+            "type": "string",
+            "example": "#002366",
+            "description": "Hex color code"
+          },
+          "disclaimer": {
+            "type": "string",
+            "example": "قد تتأثر دقة اللون بإضاءة الغرفة الحالية",
+            "description": "Lighting warning or environmental note"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.95,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Color detection confidence score (0 to 1)"
+          }
+        },
+        "required": [
+          "colorNameArabic",
+          "colorNameEnglish",
+          "hexCode",
+          "disclaimer",
+          "confidence"
+        ]
+      },
+      "TrafficSignResultDto": {
+        "type": "object",
+        "properties": {
+          "signName": {
+            "type": "string",
+            "example": "Pedestrian Crossing",
+            "description": "Traffic sign title or type"
+          },
+          "spokenMeaning": {
+            "type": "string",
+            "example": "إشارة عبور مشاة، يمكنك العبور بحذر",
+            "description": "Spoken safety advisory in Arabic"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.91,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Sign detection confidence score (0 to 1)"
+          }
+        },
+        "required": [
+          "signName",
+          "spokenMeaning",
+          "confidence"
+        ]
+      },
+      "FaceExpressionResultDto": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "enum": [
+              "Smiling / Happy",
+              "Neutral",
+              "Sad",
+              "Surprised",
+              "Angry"
+            ],
+            "example": "Smiling / Happy",
+            "description": "Facial expression description"
+          },
+          "spokenDescription": {
+            "type": "string",
+            "example": "الشخص الذي أمامك يبتسم ويبدو سعيداً",
+            "description": "Natural spoken Arabic explanation"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.88,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Expression recognition confidence score (0 to 1)"
+          }
+        },
+        "required": [
+          "expression",
+          "spokenDescription",
+          "confidence"
+        ]
+      },
+      "ObstacleResultDto": {
+        "type": "object",
+        "properties": {
+          "hazardDetected": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether an active proximity hazard is detected"
+          },
+          "obstacleType": {
+            "type": "string",
+            "example": "درج / سلم هابط",
+            "description": "Type or classification of detected obstacle in Arabic"
+          },
+          "distanceMeters": {
+            "type": "number",
+            "example": 1.2,
+            "description": "Estimated distance in meters to obstacle"
+          },
+          "hapticAlertPattern": {
+            "type": "string",
+            "enum": [
+              "NONE",
+              "LIGHT_VIBRATION",
+              "STRONG_VIBRATION"
+            ],
+            "example": "STRONG_VIBRATION",
+            "description": "Recommended mobile haptic vibration feedback pattern"
+          },
+          "spokenWarning": {
+            "type": "string",
+            "example": "انتبه! أمامك درجات سلم على بعد خطوتين",
+            "description": "Urgent spoken warning in Arabic"
+          },
+          "confidence": {
+            "type": "number",
+            "example": 0.93,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Obstacle detection confidence score (0 to 1)"
+          }
+        },
+        "required": [
+          "hazardDetected",
+          "hapticAlertPattern",
+          "spokenWarning",
+          "confidence"
+        ]
+      }
+    }
+  }
+}

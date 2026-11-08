@@ -41,8 +41,9 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     NavigationModule,
     OcrModule,
     VoiceModule,
+    VisionModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [],
 })
 export class AppModule {}

@@ -4,7 +4,7 @@
   "description": "Nest TypeScript starter repository",
   "private": true,
   "license": "MIT",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "build": "nest build",
     "deploy": "nest deploy",
@@ -18,18 +18,26 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "typeorm": "node ./node_modules/typeorm/cli.js",
+    "migration:generate": "npm run build && node ./node_modules/typeorm/cli.js migration:generate -d dist/database/data-source.js",
+    "migration:run": "npm run build && node ./node_modules/typeorm/cli.js migration:run -d dist/database/data-source.js",
+    "migration:revert": "npm run build && node ./node_modules/typeorm/cli.js migration:revert -d dist/database/data-source.js",
+    "migration:show": "npm run build && node ./node_modules/typeorm/cli.js migration:show -d dist/database/data-source.js"
   },
   "dependencies": {
-    "@nestjs/common": "^12.0.1",
+    "@nestjs/common": "^12.4.0",
+    "@nestjs/config": "^12.1.1",
     "@nestjs/core": "^12.0.1",
+    "@nestjs/mapped-types": "^12.0.1",
     "@nestjs/observe": "^0.3.0",
     "@nestjs/platform-express": "^12.0.1",
-    "@nestjs/swagger": "^12.1.0",
-    "class-transformer": "^0.5.1",
-    "class-validator": "^0.15.1",
+    "@nestjs/typeorm": "^12.0.2",
+    "dotenv": "^18.0.9",
+    "pg": "^8.23.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "typeorm": "^0.3.31"
   },
   "devDependencies": {
     "@nestjs/cli": "^12.0.0",
@@ -37,7 +45,7 @@
     "@nestjs/schematics": "^12.0.0",
     "@nestjs/testing": "^12.0.1",
     "@types/express": "^5.0.0",
-    "@types/node": "^24.0.0",
+    "@types/node": "^24.19.2",
     "@types/supertest": "^7.0.0",
     "@vitest/coverage-v8": "^4.1.2",
     "oxlint": "^1.58.0",

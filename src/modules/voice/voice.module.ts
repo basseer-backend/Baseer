@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { VoiceController } from './voice.controller.js';
+import { VoiceService } from './voice.service';
+import { VoiceController } from './voice.controller';
 
 @Module({
   controllers: [VoiceController],
+  providers: [VoiceService],
 })
 export class VoiceModule {}

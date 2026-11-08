@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { OcrController } from './ocr.controller.js';
+import { OcrService } from './ocr.service';
+import { OcrController } from './ocr.controller';
 
 @Module({
   controllers: [OcrController],
+  providers: [OcrService],
 })
 export class OcrModule {}

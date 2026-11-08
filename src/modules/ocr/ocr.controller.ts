@@ -1,34 +1,43 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { OcrService } from './ocr.service';
-import { CreateOcrDto } from './dto/create-ocr.dto';
-import { UpdateOcrDto } from './dto/update-ocr.dto';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ImageInputDto } from '../../common/dto/image-input.dto';
+import { OcrResultDto } from './dto/ocr-result.dto';
+import {
+  ApiOkEnvelope,
+  ApiErrorExamples,
+} from '../../common/decorators/swagger.decorator';
+import { AppErrorCode } from '../../common/constants/error-codes';
+import { validateImageInput } from '../../common/helpers/image-validation.helper';
 
+@ApiTags('OCR & Documents')
 @Controller('ocr')
 export class OcrController {
-  constructor(private readonly ocrService: OcrService) {}
+  @Post('read')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Read text from captured image (Prescription, Menu, Sign)',
+    description:
+      'Extracts text from Base64 image payload. Fake test triggers: pass imageBase64 as "blurry", "dark", "notext", "unsupported", or "toolarge".',
+  })
+  @ApiOkEnvelope(OcrResultDto)
+  @ApiErrorExamples(
+    AppErrorCode.IMAGE_BLURRY,
+    AppErrorCode.IMAGE_TOO_DARK,
+    AppErrorCode.NO_TEXT_DETECTED,
+    AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.VALIDATION_FAILED,
+    AppErrorCode.FILE_TOO_LARGE,
+  )
+  readDocument(@Body() body: ImageInputDto): OcrResultDto {
+    validateImageInput(body.imageBase64, { allowNoTextTrigger: true });
 
-  @Post()
-  create(@Body() createOcrDto: CreateOcrDto) {
-    return this.ocrService.create(createOcrDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.ocrService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.ocrService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateOcrDto: UpdateOcrDto) {
-    return this.ocrService.update(+id, updateOcrDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.ocrService.remove(+id);
+    return {
+      detectedLanguage: 'en',
+      extractedText:
+        'Panadol Extra 500mg - Take 2 tablets every 8 hours after meals.',
+      arabicSimplifiedText:
+        'بنادول إكسترا 500 مجم - قرصين كل 8 ساعات بعد الأكل',
+      confidence: 0.96,
+    };
   }
 }

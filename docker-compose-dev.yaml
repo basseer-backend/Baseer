@@ -1,0 +1,26 @@
+
+services:
+
+  backend:
+    build:
+      context: .
+      target: dev
+    container_name: baseer-backend
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file:
+      - config/.env.dev
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - .:/baseer
+      - /baseer/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started

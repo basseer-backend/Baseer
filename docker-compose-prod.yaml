@@ -1,0 +1,12 @@
+
+services:
+  restaurant-app-prod:
+    build: 
+      context: .
+      target: prod
+    container_name:  baseer-app-prod-con
+    env_file:
+      - ./config/.env.prod
+ 
+    ports:
+      - "4001:3000"

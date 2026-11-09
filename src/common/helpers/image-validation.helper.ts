@@ -1,5 +1,5 @@
-import { AppErrorCode } from '../constants/error-codes.js';
-import { AppException } from '../exceptions/app.exception.js';
+import { AppErrorCode } from '../constants/error-codes';
+import { AppException } from '../exceptions/app.exception';
 
 export interface ImageValidationOptions {
   allowNoTextTrigger?: boolean;

@@ -1,18 +1,18 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { ImageInputDto } from '../../common/dto/image-input.dto.js';
-import { SceneDescriptionDto } from './dto/scene-description.dto.js';
-import { CurrencyResultDto } from './dto/currency-result.dto.js';
-import { ColorResultDto } from './dto/color-result.dto.js';
-import { TrafficSignResultDto } from './dto/traffic-sign-result.dto.js';
-import { FaceExpressionResultDto } from './dto/face-expression-result.dto.js';
-import { ObstacleResultDto, HapticPattern } from './dto/obstacle-result.dto.js';
+import { ImageInputDto } from '../../common/dto/image-input.dto';
+import { SceneDescriptionDto } from './dto/scene-description.dto';
+import { CurrencyResultDto } from './dto/currency-result.dto';
+import { ColorResultDto } from './dto/color-result.dto';
+import { TrafficSignResultDto } from './dto/traffic-sign-result.dto';
+import { FaceExpressionResultDto } from './dto/face-expression-result.dto';
+import { ObstacleResultDto, HapticPattern } from './dto/obstacle-result.dto';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
-} from '../../common/decorators/swagger.decorator.js';
-import { AppErrorCode } from '../../common/constants/error-codes.js';
-import { validateImageInput } from '../../common/helpers/image-validation.helper.js';
+} from '../../common/decorators/swagger.decorator';
+import { AppErrorCode } from '../../common/constants/error-codes';
+import { validateImageInput } from '../../common/helpers/image-validation.helper';
 
 @ApiTags('Computer Vision')
 @Controller('vision')

@@ -97,9 +97,9 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  console.log(`🚀 Baseer Server running on: http://localhost:${port}/api/v1`);
+  console.log(`Baseer Server running on: http://localhost:${port}/api/v1`);
   console.log(
-    `📚 Swagger API Docs available at: http://localhost:${port}/api-docs`,
+    `Swagger API Docs available at: http://localhost:${port}/api-docs`,
   );
 }
 

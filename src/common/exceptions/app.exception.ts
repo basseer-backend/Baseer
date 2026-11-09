@@ -3,7 +3,7 @@ import {
   AppErrorCode,
   ERROR_HTTP_STATUS,
   ERROR_MESSAGES,
-} from '../constants/error-codes.js';
+} from '../constants/error-codes';
 
 export class AppException extends HttpException {
   constructor(

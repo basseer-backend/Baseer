@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Response } from 'express';
 import { Stream } from 'stream';
-import { SuccessResponse } from '../interfaces/api-response.interface.js';
+import { SuccessResponse } from '../interfaces/api-response.interface';
 
 @Injectable()
 export class TransformInterceptor<T>

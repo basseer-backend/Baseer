@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AppErrorCode } from '../constants/error-codes.js';
+import { AppErrorCode } from '../constants/error-codes';
 
 export interface SuccessResponse<T = any> {
   success: true;

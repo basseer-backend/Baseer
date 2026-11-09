@@ -15,6 +15,7 @@ import { PreferencesModule } from './modules/preferences/preferences.module';
 import { TasksModule } from './modules/tasks/tasks.module';
 import { UsersModule } from './modules/users/users.module';
 import { VoiceModule } from './modules/voice/voice.module';
+import { VisionModule } from './modules/vision/vision.module';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 

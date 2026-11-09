@@ -4,11 +4,11 @@ import {
   AppErrorCode,
   ERROR_HTTP_STATUS,
   ERROR_MESSAGES,
-} from '../constants/error-codes.js';
+} from '../constants/error-codes';
 import {
   SuccessResponseDto,
   ErrorResponseDto,
-} from '../interfaces/api-response.interface.js';
+} from '../interfaces/api-response.interface';
 
 /**
  * Decorator to wrap response DTO inside the standard Baseer SuccessResponse envelope

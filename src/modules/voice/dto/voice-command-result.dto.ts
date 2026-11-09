@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { VoiceIntent, MobileAction } from './voice-enums.js';
+import { VoiceIntent, MobileAction } from './voice-enums';
 
 export class VoiceCommandResultDto {
   @ApiProperty({

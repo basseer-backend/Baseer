@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { VisionController } from './vision.controller.js';
+import { VisionController } from './vision.controller';
 
 @Module({
   controllers: [VisionController],

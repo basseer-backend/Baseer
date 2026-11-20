@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 422,
+  "errorCode": "ERR_IMAGE_TOO_DARK",
+  "message": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

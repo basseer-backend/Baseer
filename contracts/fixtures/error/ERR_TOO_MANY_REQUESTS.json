@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 429,
+  "errorCode": "ERR_TOO_MANY_REQUESTS",
+  "message": "طلبات كثيرة جداً، يرجى الانتظار قليلاً",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

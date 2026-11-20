@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 400,
+  "errorCode": "ERR_INVALID_QR_CODE",
+  "message": "كود الـ QR غير صالح أو تالف",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

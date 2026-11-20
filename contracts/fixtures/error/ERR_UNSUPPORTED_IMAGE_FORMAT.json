@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 422,
+  "errorCode": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+  "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

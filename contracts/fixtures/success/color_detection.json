@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "colorNameArabic": "أزرق داكن",
+    "colorNameEnglish": "Dark Blue",
+    "hexCode": "#002366",
+    "disclaimer": "قد تتأثر دقة اللون بإضاءة الغرفة الحالية",
+    "confidence": 0.95
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

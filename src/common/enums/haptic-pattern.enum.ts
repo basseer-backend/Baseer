@@ -1,0 +1,5 @@
+export enum HapticPattern {
+  NONE = 'NONE',
+  LIGHT_VIBRATION = 'LIGHT_VIBRATION',
+  STRONG_VIBRATION = 'STRONG_VIBRATION',
+}

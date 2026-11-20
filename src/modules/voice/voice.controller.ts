@@ -2,7 +2,7 @@ import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { VoiceCommandDto } from './dto/voice-command.dto';
 import { VoiceCommandResultDto } from './dto/voice-command-result.dto';
-import { VoiceIntent, MobileAction } from './dto/voice-enums';
+import { VoiceIntent, MobileAction } from '../../common/enums';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
@@ -18,11 +18,13 @@ export class VoiceController {
   @ApiOperation({
     summary: 'Process colloquial Egyptian voice command and return intent',
     description:
-      'Maps spoken text to system intents and mobile triggers. If the phrase is unrecognized, throws ERR_INTENT_NOT_RECOGNIZED.',
+      'Maps spoken text to system intents and mobile triggers. If the phrase is unrecognized, throws ERR_INTENT_NOT_RECOGNIZED. Fake test triggers: "unrecognized", "lowconfidence", "timeout".',
   })
   @ApiOkEnvelope(VoiceCommandResultDto)
   @ApiErrorExamples(
     AppErrorCode.INTENT_NOT_RECOGNIZED,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
   )
   processCommand(@Body() body: VoiceCommandDto): VoiceCommandResultDto {
@@ -31,6 +33,14 @@ export class VoiceController {
     // Fake test trigger for unhandled intent
     if (text === 'unrecognized' || text === 'unknown') {
       throw new AppException(AppErrorCode.INTENT_NOT_RECOGNIZED);
+    }
+
+    if (text === 'lowconfidence') {
+      throw new AppException(AppErrorCode.LOW_CONFIDENCE);
+    }
+
+    if (text === 'timeout') {
+      throw new AppException(AppErrorCode.REQUEST_TIMEOUT);
     }
 
     // 1) DETECT_COLOR (لون / ألوان)

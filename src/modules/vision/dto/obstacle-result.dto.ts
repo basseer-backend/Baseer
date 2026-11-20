@@ -1,10 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export enum HapticPattern {
-  NONE = 'NONE',
-  LIGHT_VIBRATION = 'LIGHT_VIBRATION',
-  STRONG_VIBRATION = 'STRONG_VIBRATION',
-}
+import { HapticPattern } from '../../../common/enums';
 
 export class ObstacleResultDto {
   @ApiProperty({

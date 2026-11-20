@@ -17,7 +17,7 @@ export class OcrController {
   @ApiOperation({
     summary: 'Read text from captured image (Prescription, Menu, Sign)',
     description:
-      'Extracts text from Base64 image payload. Fake test triggers: pass imageBase64 as "blurry", "dark", "notext", "unsupported", or "toolarge".',
+      'Extracts text from Base64 image payload. Fake test triggers: pass imageBase64 as "blurry", "dark", "notext", "unsupported", "toolarge", "lowconfidence", or "timeout".',
   })
   @ApiOkEnvelope(OcrResultDto)
   @ApiErrorExamples(
@@ -25,6 +25,8 @@ export class OcrController {
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.NO_TEXT_DETECTED,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )

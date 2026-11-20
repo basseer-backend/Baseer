@@ -5,7 +5,7 @@ export class VoiceCommandDto {
   @ApiProperty({
     example: 'شوفلي الورقة دي مكتوب فيها إيه',
     description:
-      'Colloquial Egyptian Arabic transcript. Fake test trigger: send "unrecognized" or unsupported words to test ERR_INTENT_NOT_RECOGNIZED.',
+      'Colloquial Egyptian Arabic transcript. Fake test triggers: send "unrecognized" or "unknown" for ERR_INTENT_NOT_RECOGNIZED, "lowconfidence" for ERR_LOW_CONFIDENCE, or "timeout" for ERR_REQUEST_TIMEOUT.',
   })
   @IsString({ message: 'userSpeech must be a string' })
   @IsNotEmpty({ message: 'userSpeech is required' })

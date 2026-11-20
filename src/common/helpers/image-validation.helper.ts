@@ -27,6 +27,12 @@ export function validateImageInput(
   if (raw === 'toolarge') {
     throw new AppException(AppErrorCode.FILE_TOO_LARGE);
   }
+  if (raw === 'lowconfidence') {
+    throw new AppException(AppErrorCode.LOW_CONFIDENCE);
+  }
+  if (raw === 'timeout') {
+    throw new AppException(AppErrorCode.REQUEST_TIMEOUT);
+  }
   if (options.allowNoTextTrigger && raw === 'notext') {
     throw new AppException(AppErrorCode.NO_TEXT_DETECTED);
   }

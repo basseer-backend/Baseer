@@ -44,6 +44,39 @@ export function ApiOkEnvelope<T extends Type<unknown>>(
 }
 
 /**
+ * Decorator to wrap created response DTO inside the standard Baseer SuccessResponse envelope (HTTP 201)
+ */
+export function ApiCreatedEnvelope<T extends Type<unknown>>(
+  dataDto: T,
+  isArray = false,
+) {
+  return applyDecorators(
+    ApiExtraModels(SuccessResponseDto, dataDto),
+    ApiResponse({
+      status: HttpStatus.CREATED,
+      description: 'Resource successfully created',
+      schema: {
+        allOf: [
+          { $ref: getSchemaPath(SuccessResponseDto) },
+          {
+            properties: {
+              data: isArray
+                ? {
+                    type: 'array',
+                    items: { $ref: getSchemaPath(dataDto) },
+                  }
+                : {
+                    $ref: getSchemaPath(dataDto),
+                  },
+            },
+          },
+        ],
+      },
+    }),
+  );
+}
+
+/**
  * Decorator to generate Swagger OpenAPI error responses grouped by HTTP status
  */
 export function ApiErrorExamples(...codes: AppErrorCode[]) {

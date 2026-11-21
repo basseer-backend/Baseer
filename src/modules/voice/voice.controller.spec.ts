@@ -1,20 +1,42 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { VoiceController } from './voice.controller';
-import { VoiceService } from './voice.service';
+import { VoiceAssistantService } from './voice-assistant.service';
+import { VoiceIntent, MobileAction } from '../../common/enums';
+import { VoiceCommandResultDto } from './dto/voice-command-result.dto';
 
 describe('VoiceController', () => {
   let controller: VoiceController;
+  let voiceAssistantService: {
+    processCommand: ReturnType<typeof vi.fn>;
+  };
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [VoiceController],
-      providers: [VoiceService],
-    }).compile();
-
-    controller = module.get<VoiceController>(VoiceController);
+  beforeEach(() => {
+    voiceAssistantService = {
+      processCommand: vi.fn(),
+    };
+    controller = new VoiceController(
+      voiceAssistantService as unknown as VoiceAssistantService,
+    );
   });
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+  it('should delegate command execution to VoiceAssistantService and return result', async () => {
+    const mockResult: VoiceCommandResultDto = {
+      userInput: 'اقرأ لي الورقة دي',
+      detectedIntent: VoiceIntent.READ_DOCUMENT,
+      confidence: 0.95,
+      spokenResponse: 'تمام، وجه الكاميرا نحو الورقة وسأقرأها لك حالاً',
+      actionToTriggerOnMobile: MobileAction.OPEN_CAMERA_OCR,
+      requiresClarification: false,
+    };
+    voiceAssistantService.processCommand.mockResolvedValue(mockResult);
+
+    const dto = { userSpeech: 'اقرأ لي الورقة دي', language: 'ar-EG' };
+    const response = await controller.processCommand(dto, 'corr-test-1');
+
+    expect(voiceAssistantService.processCommand).toHaveBeenCalledWith(
+      dto,
+      'corr-test-1',
+    );
+    expect(response).toEqual(mockResult);
   });
 });

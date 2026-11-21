@@ -1,5 +1,5 @@
-import { AiModel } from './ai-model.entity';
-import { AiModelVersion } from './ai-model-version.entity';
+import { AiModel, AiModelStatus } from './ai-model.entity';
+import { AiModelVersion, AiModelVersionStatus } from './ai-model-version.entity';
 import { AuthSession } from './auth-session.entity';
 import { DeletionAuditEvent } from './deletion-audit-event.entity';
 import { DeletionRequest } from './deletion-request.entity';
@@ -28,7 +28,9 @@ export const databaseEntities = [
 
 export {
   AiModel,
+  AiModelStatus,
   AiModelVersion,
+  AiModelVersionStatus,
   AuthSession,
   DeletionAuditEvent,
   DeletionRequest,

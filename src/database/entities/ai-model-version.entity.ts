@@ -11,12 +11,21 @@ import {
 import { AiModel } from './ai-model.entity';
 import { TaskModelRun } from './task-model-run.entity';
 
+export enum AiModelVersionStatus {
+  PLANNED = 'planned',
+  DRAFT = 'draft',
+  APPROVED = 'approved',
+  ACTIVE = 'active',
+  DEPRECATED = 'deprecated',
+  RETIRED = 'retired',
+}
+
 @Entity({ name: 'ai_model_versions' })
 @Unique('uq_ai_model_versions_model_version', ['modelId', 'version'])
 @Unique('uq_ai_model_versions_id_model', ['id', 'modelId'])
 @Check(
   'ck_ai_model_versions_sha256',
-  `"artifact_sha256" ~ '^[0-9a-f]{64}$'`,
+  `"artifact_sha256" IS NULL OR "artifact_sha256" ~ '^[0-9a-f]{64}$'`,
 )
 @Check(
   'ck_ai_model_versions_target',
@@ -24,7 +33,11 @@ import { TaskModelRun } from './task-model-run.entity';
 )
 @Check(
   'ck_ai_model_versions_status',
-  `"status" IN ('draft', 'approved', 'active', 'deprecated', 'retired')`,
+  `"status" IN ('planned', 'draft', 'approved', 'active', 'deprecated', 'retired')`,
+)
+@Check(
+  'ck_ai_model_versions_artifact_presence',
+  `("status" = 'planned') OR ("artifact_sha256" IS NOT NULL AND "artifact_uri" IS NOT NULL)`,
 )
 @Check(
   'ck_ai_model_versions_rollback_self',
@@ -56,19 +69,34 @@ export class AiModelVersion {
   @Column({ name: 'version', type: 'varchar', length: 32 })
   version: string;
 
-  @Column({ name: 'artifact_sha256', type: 'char', length: 64 })
-  artifactSha256: string;
+  @Column({
+    name: 'artifact_sha256',
+    type: 'char',
+    length: 64,
+    nullable: true,
+  })
+  artifactSha256: string | null;
 
-  @Column({ name: 'artifact_uri', type: 'text' })
-  artifactUri: string;
+  @Column({ name: 'artifact_uri', type: 'text', nullable: true })
+  artifactUri: string | null;
 
-  @Column({ name: 'runtime', type: 'varchar', length: 32 })
+  @Column({ name: 'runtime', type: 'varchar', length: 32, default: 'onnx' })
   runtime: string;
 
-  @Column({ name: 'deployment_target', type: 'varchar', length: 6 })
+  @Column({
+    name: 'deployment_target',
+    type: 'varchar',
+    length: 6,
+    default: 'cloud',
+  })
   deploymentTarget: string;
 
-  @Column({ name: 'license', type: 'varchar', length: 64 })
+  @Column({
+    name: 'license',
+    type: 'varchar',
+    length: 64,
+    default: 'Proprietary',
+  })
   license: string;
 
   @Column({ name: 'model_card_uri', type: 'text', nullable: true })
@@ -77,10 +105,7 @@ export class AiModelVersion {
   /**
    * fk_ai_model_versions_rollback is the composite foreign key
    * (rollback_target_version_id, model_id) -> ai_model_versions (id, model_id)
-   * with ON DELETE RESTRICT. It is created in the SQL migration. A TypeORM
-   * relation is not declared here because model_id is already the join column
-   * of the model relation, and a second join on that column would not preserve
-   * the same-model rule safely.
+   * with ON DELETE RESTRICT. It is enforced in the database schema.
    */
   @Column({
     name: 'rollback_target_version_id',
@@ -93,12 +118,15 @@ export class AiModelVersion {
     name: 'status',
     type: 'varchar',
     length: 16,
-    default: 'draft',
+    default: AiModelVersionStatus.PLANNED,
   })
   status: string;
 
   @Column({ name: 'created_at', type: 'timestamptz', default: () => 'now()' })
   createdAt: Date;
+
+  @Column({ name: 'updated_at', type: 'timestamptz', default: () => 'now()' })
+  updatedAt: Date;
 
   @OneToMany(() => TaskModelRun, (taskModelRun) => taskModelRun.modelVersion)
   taskModelRuns: TaskModelRun[];

@@ -1,0 +1,1173 @@
+{
+  "info": {
+    "_postman_id": "b3e0c4a1-8765-4f12-9c3a-baseer000001",
+    "name": "Baseer API (بصـير) - Complete Test Suite",
+    "description": "Comprehensive Postman collection for testing all Baseer backend endpoints:\n- User Preferences & Consents (Protected with JWT)\n- System Health\n- OCR & Document Reading\n- Voice Assistant (Egyptian Dialect)\n- Indoor Navigation (QR-based)\n- Computer Vision (Currency, Obstacles, Signs, Color, Expressions, Scene)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Automatically generate standard HS256 JWT token if not explicitly provided",
+          "const secret = pm.variables.get('jwt_secret') || 'baseer-assistive-ai-default-secret-key-32-chars-long';",
+          "const userId = pm.variables.get('user_id') || '11111111-1111-1111-1111-111111111111';",
+          "",
+          "function base64url(source) {",
+          "    let encodedSource = CryptoJS.enc.Base64.stringify(source);",
+          "    encodedSource = encodedSource.replace(/=+$/, '');",
+          "    encodedSource = encodedSource.replace(/\\+/g, '-');",
+          "    encodedSource = encodedSource.replace(/\\//g, '_');",
+          "    return encodedSource;",
+          "}",
+          "",
+          "const header = { alg: 'HS256', typ: 'JWT' };",
+          "const now = Math.floor(Date.now() / 1000);",
+          "const payload = {",
+          "    sub: userId,",
+          "    userId: userId,",
+          "    isGuest: false,",
+          "    iat: now,",
+          "    exp: now + 86400",
+          "};",
+          "",
+          "const stringifiedHeader = CryptoJS.enc.Utf8.parse(JSON.stringify(header));",
+          "const encodedHeader = base64url(stringifiedHeader);",
+          "",
+          "const stringifiedPayload = CryptoJS.enc.Utf8.parse(JSON.stringify(payload));",
+          "const encodedPayload = base64url(stringifiedPayload);",
+          "",
+          "const tokenData = encodedHeader + '.' + encodedPayload;",
+          "const signature = CryptoJS.HmacSHA256(tokenData, secret);",
+          "const encodedSignature = base64url(signature);",
+          "",
+          "const token = tokenData + '.' + encodedSignature;",
+          "pm.variables.set('jwt_token', token);"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_secret",
+      "value": "baseer-assistive-ai-default-secret-key-32-chars-long",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "11111111-1111-1111-1111-111111111111",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - System & Health",
+      "item": [
+        {
+          "name": "Server Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Verifies that the Baseer API backend is alive and operational."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - Authentication",
+      "description": "User registration, login, token refresh with rotation, guest access, profile, and logout.",
+      "item": [
+        {
+          "name": "Guest Authentication (POST /auth/guest)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Guest user and tokens created according to Baseer schema\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.user.id).to.be.a(\"string\");",
+                  "    pm.expect(jsonData.data.user.isGuest).to.eql(true);",
+                  "    pm.expect(jsonData.data.user.preferredLanguage).to.eql(\"ar-EG\");",
+                  "    pm.expect(jsonData.data.tokens.accessToken).to.be.a(\"string\");",
+                  "    pm.expect(jsonData.data.tokens.refreshToken).to.be.a(\"string\");",
+                  "",
+                  "    pm.environment.set(\"jwt_token\", jsonData.data.tokens.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", jsonData.data.tokens.refreshToken);",
+                  "    pm.environment.set(\"user_id\", jsonData.data.user.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"preferredLanguage\": \"ar-EG\",\n  \"devicePlatform\": \"flutter\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/guest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "guest"
+              ]
+            },
+            "description": "Creates an anonymous guest session directly in users and auth_sessions tables."
+          }
+        },
+        {
+          "name": "Refresh Access Token (POST /auth/refresh)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Rotated tokens saved to environment\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.accessToken).to.be.a(\"string\");",
+                  "    pm.expect(jsonData.data.refreshToken).to.be.a(\"string\");",
+                  "",
+                  "    pm.environment.set(\"jwt_token\", jsonData.data.accessToken);",
+                  "    pm.environment.set(\"refresh_token\", jsonData.data.refreshToken);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\",\n  \"devicePlatform\": \"flutter\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Rotates refresh token and issues a new access token using auth_sessions table."
+          }
+        },
+        {
+          "name": "Get Current User (GET /auth/me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Profile returned with exact DB schema fields\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data.id).to.be.a(\"string\");",
+                  "    pm.expect(jsonData.data.isGuest).to.be.a(\"boolean\");",
+                  "    pm.expect(jsonData.data.preferredLanguage).to.be.a(\"string\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Retrieves profile of the authenticated user from users table."
+          }
+        },
+        {
+          "name": "Logout Session (POST /auth/logout)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Logout success message returned\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revokes the current session or refresh token in auth_sessions."
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - User Preferences & Consents (Protected)",
+      "item": [
+        {
+          "name": "Get User Preferences",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "preferences"
+              ]
+            },
+            "description": "Retrieves the current authenticated user's accessibility settings (speech rate, haptic feedback, contrast, wake-word). Returns default values if not configured yet."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Preferences - Full",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speechRate\": 1.25,\n  \"highContrastEnabled\": true,\n  \"hapticEnabled\": true,\n  \"hapticIntensity\": \"high\",\n  \"voiceWakeWordEnabled\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "preferences"
+              ]
+            },
+            "description": "Updates all accessibility preferences for the authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Preferences - Partial (Speech Rate Only)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speechRate\": 1.50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "preferences"
+              ]
+            },
+            "description": "Partially updates only the speech rate while preserving other accessibility settings."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Consents",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/consents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "consents"
+              ]
+            },
+            "description": "Retrieves active user consent records, policy version, and update timestamps."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Consents - Policy v1.0",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consents\": [\n    {\n      \"consentType\": \"cloud_ai\",\n      \"accepted\": true,\n      \"policyVersion\": \"1.0\"\n    },\n    {\n      \"consentType\": \"diagnostics\",\n      \"accepted\": false,\n      \"policyVersion\": \"1.0\"\n    },\n    {\n      \"consentType\": \"privacy_policy\",\n      \"accepted\": true,\n      \"policyVersion\": \"1.0\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/consents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "consents"
+              ]
+            },
+            "description": "Atomically saves user consent choices under policy version 1.0 in a database transaction."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Consents - Policy v2.0 (Upgrade)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consents\": [\n    {\n      \"consentType\": \"cloud_ai\",\n      \"accepted\": true,\n      \"policyVersion\": \"2.0\"\n    },\n    {\n      \"consentType\": \"diagnostics\",\n      \"accepted\": true,\n      \"policyVersion\": \"2.0\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/consents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "consents"
+              ]
+            },
+            "description": "Records user response to a new policy version (2.0). Verifies non-inheritance from older versions."
+          },
+          "response": []
+        },
+        {
+          "name": "Error Test - Unauthenticated (Missing Token)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "preferences"
+              ]
+            },
+            "description": "Should fail with 401 Unauthorized (ERR_UNAUTHORIZED) because no Bearer token is provided."
+          },
+          "response": []
+        },
+        {
+          "name": "Error Test - Invalid Speech Rate Validation",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"speechRate\": 5.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/preferences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "me",
+                "preferences"
+              ]
+            },
+            "description": "Should fail with 400 Bad Request (ERR_VALIDATION_FAILED) because speechRate must not exceed 3.00."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 - OCR & Document Reading",
+      "item": [
+        {
+          "name": "Read Document (Prescription / Sign / Menu)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ocr/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ocr",
+                "read"
+              ]
+            },
+            "description": "Extracts text from Base64 image payload. Returns detected language, raw extracted text, simplified Arabic text, and confidence."
+          },
+          "response": []
+        },
+        {
+          "name": "Read Document - Trigger Blurry Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"blurry\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ocr/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ocr",
+                "read"
+              ]
+            },
+            "description": "Sends 'blurry' trigger string to test the ERR_IMAGE_BLURRY (422 Unprocessable Entity) error envelope."
+          },
+          "response": []
+        },
+        {
+          "name": "Read Document - Trigger Too Dark Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"dark\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ocr/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ocr",
+                "read"
+              ]
+            },
+            "description": "Sends 'dark' trigger string to test the ERR_IMAGE_TOO_DARK (422 Unprocessable Entity) error envelope."
+          },
+          "response": []
+        },
+        {
+          "name": "Read Document - Trigger No Text Detected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"notext\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/ocr/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ocr",
+                "read"
+              ]
+            },
+            "description": "Sends 'notext' trigger string to test the ERR_NO_TEXT_DETECTED (422) error envelope."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "05 - Voice Assistant",
+      "item": [
+        {
+          "name": "Voice Command - Detect Obstacles",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSpeech\": \"في أي عائق أو سلم قدامي؟\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice/command",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice",
+                "command"
+              ]
+            },
+            "description": "Processes Egyptian Arabic spoken command and maps it to DETECT_OBSTACLE intent and OPEN_CAMERA_OBSTACLE mobile action."
+          },
+          "response": []
+        },
+        {
+          "name": "Voice Command - Recognize Currency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSpeech\": \"كام الفلوس دي؟\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice/command",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice",
+                "command"
+              ]
+            },
+            "description": "Maps spoken Egyptian question about money to RECOGNIZE_CURRENCY intent and OPEN_CAMERA_CURRENCY action."
+          },
+          "response": []
+        },
+        {
+          "name": "Voice Command - Detect Color",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSpeech\": \"إيه لون القميص ده؟\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice/command",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice",
+                "command"
+              ]
+            },
+            "description": "Maps spoken color query to DETECT_COLOR intent."
+          },
+          "response": []
+        },
+        {
+          "name": "Voice Command - Read Document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSpeech\": \"اقرأ لي الروشتة دي\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice/command",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice",
+                "command"
+              ]
+            },
+            "description": "Maps spoken document request to READ_DOCUMENT intent."
+          },
+          "response": []
+        },
+        {
+          "name": "Voice Command - Describe Surroundings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSpeech\": \"أنا شايف إيه قدامي دلوقتي؟\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice/command",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice",
+                "command"
+              ]
+            },
+            "description": "Maps scene query to DESCRIBE_SCENE intent."
+          },
+          "response": []
+        },
+        {
+          "name": "Voice Command - Indoor Navigation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSpeech\": \"عايز أروح مكتب شؤون الطلبة\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice/command",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice",
+                "command"
+              ]
+            },
+            "description": "Maps navigation request to INDOOR_NAVIGATION intent."
+          },
+          "response": []
+        },
+        {
+          "name": "Voice Command - Unknown / Unrecognized Intent Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userSpeech\": \"unknown\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/voice/command",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "voice",
+                "command"
+              ]
+            },
+            "description": "Sends 'unknown' trigger to verify ERR_INTENT_NOT_RECOGNIZED (422) handling."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "06 - Indoor Navigation",
+      "item": [
+        {
+          "name": "Get Indoor Destinations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/navigation/destinations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "navigation",
+                "destinations"
+              ]
+            },
+            "description": "Retrieves the list of available indoor destination rooms, laboratories, and offices."
+          },
+          "response": []
+        },
+        {
+          "name": "Calculate Route - Entrance to Lab 1",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentQrCode\": \"QR_ENTRANCE_01\",\n  \"destinationId\": \"lab-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/navigation/route",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "navigation",
+                "route"
+              ]
+            },
+            "description": "Calculates step-by-step voice guidance route from QR_ENTRANCE_01 to lab-01."
+          },
+          "response": []
+        },
+        {
+          "name": "Route Error - Invalid QR Code",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentQrCode\": \"invalid\",\n  \"destinationId\": \"lab-01\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/navigation/route",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "navigation",
+                "route"
+              ]
+            },
+            "description": "Tests ERR_INVALID_QR_CODE (400) response."
+          },
+          "response": []
+        },
+        {
+          "name": "Route Error - Destination Not Found",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentQrCode\": \"QR_ENTRANCE_01\",\n  \"destinationId\": \"non-existent-room-99\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/navigation/route",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "navigation",
+                "route"
+              ]
+            },
+            "description": "Tests ERR_DESTINATION_NOT_FOUND (404) response."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "07 - Computer Vision",
+      "item": [
+        {
+          "name": "Describe Scene & Surroundings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"data:image/jpeg;base64,...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vision/describe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "describe"
+              ]
+            },
+            "description": "Returns descriptive Arabic narration of visible objects and spatial arrangement."
+          },
+          "response": []
+        },
+        {
+          "name": "Recognize Egyptian Currency",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"data:image/jpeg;base64,...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vision/currency",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "currency"
+              ]
+            },
+            "description": "Identifies Egyptian banknote denomination, currency, and spoken announcement."
+          },
+          "response": []
+        },
+        {
+          "name": "Detect Object Color",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"data:image/jpeg;base64,...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vision/color",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "color"
+              ]
+            },
+            "description": "Detects dominant color of target object with Arabic name, English name, and Hex code."
+          },
+          "response": []
+        },
+        {
+          "name": "Recognize Street Traffic Signs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"data:image/jpeg;base64,...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vision/traffic-signs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "traffic-signs"
+              ]
+            },
+            "description": "Recognizes pedestrian crossing, traffic signals, and street signs with spoken meaning."
+          },
+          "response": []
+        },
+        {
+          "name": "Detect Facial Expressions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"data:image/jpeg;base64,...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vision/face-expression",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "face-expression"
+              ]
+            },
+            "description": "Detects facial expression and emotional state of people facing the camera."
+          },
+          "response": []
+        },
+        {
+          "name": "Detect Obstacles & Immediate Hazards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"imageBase64\": \"data:image/jpeg;base64,...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/vision/obstacles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "vision",
+                "obstacles"
+              ]
+            },
+            "description": "Warns of immediate physical dangers (stairs, curbs, holes) with distance and haptic pattern."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

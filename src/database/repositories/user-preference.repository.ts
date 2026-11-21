@@ -16,4 +16,23 @@ export class UserPreferenceRepository extends DatabaseRepository<UserPreference>
   override findById(id: string): Promise<UserPreference | null> {
     return super.findById(id, 'userId');
   }
+
+  async findByUserId(userId: string): Promise<UserPreference | null> {
+    return this.model.findOne({ where: { userId } });
+  }
+
+  createDefault(userId: string): UserPreference {
+    return this.model.create({
+      userId,
+      speechRate: '1.00',
+      highContrastEnabled: false,
+      hapticEnabled: true,
+      hapticIntensity: 'medium',
+      voiceWakeWordEnabled: false,
+      cloudAiConsent: false,
+      diagnosticAnalyticsConsent: false,
+      consentPolicyVersion: null,
+      consentUpdatedAt: null,
+    });
+  }
 }

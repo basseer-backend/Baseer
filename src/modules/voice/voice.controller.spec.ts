@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { VoiceController } from './voice.controller';
 import { VoiceAssistantService } from './voice-assistant.service';
-import { VoiceIntent, MobileAction } from './dto/voice-enums';
+import { VoiceIntent, MobileAction } from '../../common/enums';
 import { VoiceCommandResultDto } from './dto/voice-command-result.dto';
 
 describe('VoiceController', () => {

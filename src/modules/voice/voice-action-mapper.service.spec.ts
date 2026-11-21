@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { VoiceActionMapperService } from './voice-action-mapper.service';
-import { VoiceIntent, MobileAction } from './dto/voice-enums';
+import { VoiceIntent, MobileAction } from '../../common/enums';
 import { AppException } from '../../common/exceptions/app.exception';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { AiIntentClassificationResult } from './clients/ai-agent.interface';

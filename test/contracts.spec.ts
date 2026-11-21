@@ -176,6 +176,7 @@ describe('Contracts Verification against Official Contracts v1.0.0', () => {
       expect(fixture.success).toBe(true);
       expect(fixture.statusCode).toBe(200);
       expect(fixture.data).toBeDefined();
+      expect(fixture.data).not.toBeNull();
       expect(fixture.timestamp).toBe('2026-11-13T10:30:00.000Z');
 
       // Crucial: The actual controller response must match the official fixture data!

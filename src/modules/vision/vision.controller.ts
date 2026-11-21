@@ -1,6 +1,6 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { ImageInputDto } from '../../common/dtos/image-input.dto';
+import { ImageInputDto } from '../../common/dto/image-input.dto';
 import { SceneDescriptionDto } from './dto/scene-description.dto';
 import { CurrencyResultDto } from './dto/currency-result.dto';
 import { ColorResultDto } from './dto/color-result.dto';
@@ -11,7 +11,7 @@ import { FacialExpression, HapticPattern } from '../../common/enums';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
-} from '../../common/decorator/swagger.decorator';
+} from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { validateImageInput } from '../../common/helpers/image-validation.helper';
 

@@ -15,12 +15,12 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUserId } from '../../common/decorator/current-user.decorator';
+import { CurrentUserId } from '../../common/decorators/current-user.decorator';
 import {
   ApiOkEnvelope,
   ApiCreatedEnvelope,
   ApiErrorExamples,
-} from '../../common/decorator/swagger.decorator';
+} from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import {
   GuestAuthDto,

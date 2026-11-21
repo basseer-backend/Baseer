@@ -5,7 +5,7 @@ import {
   IAiVoiceAgentClient,
   AiIntentClassificationResult,
 } from './clients/ai-agent.interface';
-import { VoiceIntent, MobileAction } from './dto/voice-enums';
+import { VoiceIntent, MobileAction } from '../../common/enums';
 import { AppException } from '../../common/exceptions/app.exception';
 import { AppErrorCode } from '../../common/constants/error-codes';
 

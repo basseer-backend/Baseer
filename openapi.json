@@ -1116,7 +1116,7 @@
     },
     "/api/v1/ocr/read": {
       "post": {
-        "description": "Extracts text from Base64 image payload. Fake test triggers: pass imageBase64 as \"blurry\", \"dark\", \"notext\", \"unsupported\", or \"toolarge\".",
+        "description": "Extracts text from Base64 image payload. Fake test triggers: pass imageBase64 as \"blurry\", \"dark\", \"notext\", \"unsupported\", \"toolarge\", \"lowconfidence\", or \"timeout\".",
         "operationId": "OcrController_readDocument",
         "parameters": [],
         "requestBody": {
@@ -1245,6 +1245,16 @@
                       "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -1271,6 +1281,28 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Read text from captured image (Prescription, Menu, Sign)",
@@ -1281,7 +1313,7 @@
     },
     "/api/v1/voice/command": {
       "post": {
-        "description": "Maps spoken text to system intents and mobile triggers. If the phrase is unrecognized, throws ERR_INTENT_NOT_RECOGNIZED.",
+        "description": "Maps spoken text to system intents and mobile triggers. If the phrase is unrecognized, throws ERR_INTENT_NOT_RECOGNIZED. Fake test triggers: \"unrecognized\", \"lowconfidence\", \"timeout\".",
         "operationId": "VoiceController_processCommand",
         "parameters": [],
         "requestBody": {
@@ -1358,6 +1390,16 @@
                       "message": "عذراً، لم أفهم طلبك، يرجى المحاولة بصيغة أخرى",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -1384,6 +1426,28 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Process colloquial Egyptian voice command and return intent",
@@ -1394,7 +1458,7 @@
     },
     "/api/v1/vision/describe": {
       "post": {
-        "description": "Provides full Arabic contextual description of surroundings. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "description": "Provides full Arabic contextual description of surroundings. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\", \"lowconfidence\", \"timeout\".",
         "operationId": "VisionController_describeScene",
         "parameters": [],
         "requestBody": {
@@ -1513,6 +1577,16 @@
                       "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -1539,6 +1613,28 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Describe objects and general scene in front of user",
@@ -1549,7 +1645,7 @@
     },
     "/api/v1/vision/currency": {
       "post": {
-        "description": "Identifies Egyptian banknotes with value and verbal announcement. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "description": "Identifies Egyptian banknotes with value and verbal announcement. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\", \"lowconfidence\", \"timeout\".",
         "operationId": "VisionController_recognizeCurrency",
         "parameters": [],
         "requestBody": {
@@ -1668,6 +1764,16 @@
                       "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -1694,6 +1800,28 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Recognize Egyptian currency banknotes",
@@ -1704,7 +1832,7 @@
     },
     "/api/v1/vision/color": {
       "post": {
-        "description": "Extracts dominant color name in Arabic and English with confidence score. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "description": "Extracts dominant color name in Arabic and English with confidence score. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\", \"lowconfidence\", \"timeout\".",
         "operationId": "VisionController_detectColor",
         "parameters": [],
         "requestBody": {
@@ -1823,6 +1951,16 @@
                       "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -1849,6 +1987,28 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Detect dominant color of target object",
@@ -1859,7 +2019,7 @@
     },
     "/api/v1/vision/traffic-signs": {
       "post": {
-        "description": "Identifies pedestrian and street traffic safety signs. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "description": "Identifies pedestrian and street traffic safety signs. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\", \"lowconfidence\", \"timeout\".",
         "operationId": "VisionController_recognizeTrafficSign",
         "parameters": [],
         "requestBody": {
@@ -1978,6 +2138,16 @@
                       "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -2004,6 +2174,28 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Recognize street traffic signs",
@@ -2014,7 +2206,7 @@
     },
     "/api/v1/vision/face-expression": {
       "post": {
-        "description": "Detects emotions and facial expressions for social awareness. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "description": "Detects emotions and facial expressions for social awareness. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\", \"lowconfidence\", \"timeout\".",
         "operationId": "VisionController_detectFaceExpression",
         "parameters": [],
         "requestBody": {
@@ -2133,6 +2325,16 @@
                       "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -2159,6 +2361,28 @@
                 }
               }
             }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "summary": "Detect facial expressions of person in frame",
@@ -2169,7 +2393,7 @@
     },
     "/api/v1/vision/obstacles": {
       "post": {
-        "description": "Warns of immediate physical dangers (stairs, holes, poles) with distance and haptic pattern. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\".",
+        "description": "Warns of immediate physical dangers (stairs, holes, poles) with distance and haptic pattern. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\", \"lowconfidence\", \"timeout\".",
         "operationId": "VisionController_detectObstacles",
         "parameters": [],
         "requestBody": {
@@ -2288,6 +2512,16 @@
                       "message": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
+                  },
+                  "ERR_LOW_CONFIDENCE": {
+                    "summary": "ERR_LOW_CONFIDENCE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_LOW_CONFIDENCE",
+                      "message": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
                   }
                 }
               }
@@ -2308,6 +2542,28 @@
                       "statusCode": 500,
                       "errorCode": "ERR_INTERNAL_SERVER_ERROR",
                       "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
                   }
@@ -2437,10 +2693,12 @@
               "ERR_FILE_TOO_LARGE",
               "ERR_TOO_MANY_REQUESTS",
               "ERR_SERVICE_UNAVAILABLE",
+              "ERR_REQUEST_TIMEOUT",
               "ERR_IMAGE_BLURRY",
               "ERR_IMAGE_TOO_DARK",
               "ERR_NO_TEXT_DETECTED",
               "ERR_UNSUPPORTED_IMAGE_FORMAT",
+              "ERR_LOW_CONFIDENCE",
               "ERR_INTENT_NOT_RECOGNIZED",
               "ERR_QR_NOT_FOUND",
               "ERR_INVALID_QR_CODE",
@@ -2930,7 +3188,7 @@
           "imageBase64": {
             "type": "string",
             "example": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
-            "description": "Base64 encoded image string (JPEG/PNG). Testing fake triggers: send \"blurry\" for ERR_IMAGE_BLURRY, \"dark\" for ERR_IMAGE_TOO_DARK, \"notext\" for ERR_NO_TEXT_DETECTED (OCR only), \"unsupported\" for ERR_UNSUPPORTED_IMAGE_FORMAT, or \"toolarge\" for ERR_FILE_TOO_LARGE."
+            "description": "Base64 encoded image string (JPEG/PNG). Testing fake triggers: send \"blurry\" for ERR_IMAGE_BLURRY, \"dark\" for ERR_IMAGE_TOO_DARK, \"notext\" for ERR_NO_TEXT_DETECTED (OCR only), \"unsupported\" for ERR_UNSUPPORTED_IMAGE_FORMAT, \"toolarge\" for ERR_FILE_TOO_LARGE, \"lowconfidence\" for ERR_LOW_CONFIDENCE, or \"timeout\" for ERR_REQUEST_TIMEOUT."
           }
         },
         "required": [
@@ -3000,7 +3258,7 @@
           "userSpeech": {
             "type": "string",
             "example": "شوفلي الورقة دي مكتوب فيها إيه",
-            "description": "Colloquial Egyptian Arabic transcript. Fake test trigger: send \"unrecognized\" or unsupported words to test ERR_INTENT_NOT_RECOGNIZED."
+            "description": "Colloquial Egyptian Arabic transcript. Fake test triggers: send \"unrecognized\" or \"unknown\" for ERR_INTENT_NOT_RECOGNIZED, \"lowconfidence\" for ERR_LOW_CONFIDENCE, or \"timeout\" for ERR_REQUEST_TIMEOUT."
           }
         },
         "required": [
@@ -3161,13 +3419,13 @@
           "expression": {
             "type": "string",
             "enum": [
-              "Smiling / Happy",
-              "Neutral",
-              "Sad",
-              "Surprised",
-              "Angry"
+              "HAPPY",
+              "NEUTRAL",
+              "SAD",
+              "SURPRISED",
+              "ANGRY"
             ],
-            "example": "Smiling / Happy",
+            "example": "HAPPY",
             "description": "Facial expression description"
           },
           "spokenDescription": {

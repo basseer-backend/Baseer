@@ -15,11 +15,11 @@ import {
 } from '@nestjs/swagger';
 import { PreferencesService } from './preferences.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { CurrentUserId } from '../../common/decorator/current-user.decorator';
+import { CurrentUserId } from '../../common/decorators/current-user.decorator';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
-} from '../../common/decorator/swagger.decorator';
+} from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { UpdateUserPreferencesDto } from './dto/update-user-preferences.dto';
 import { UserPreferencesResponseDto } from './dto/user-preferences-response.dto';

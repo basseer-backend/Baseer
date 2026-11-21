@@ -13,7 +13,7 @@ import { NavigationRouteDto } from './dto/navigation-route.dto';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
-} from '../../common/decorator/swagger.decorator';
+} from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { AppException } from '../../common/exceptions/app.exception';
 

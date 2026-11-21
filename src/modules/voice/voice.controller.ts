@@ -13,7 +13,7 @@ import { VoiceCommandResultDto } from './dto/voice-command-result.dto';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
-} from '../../common/decorator/swagger.decorator';
+} from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 
 @ApiTags('Voice Assistant')

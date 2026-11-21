@@ -1,7 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { ApiOkEnvelope } from './common/decorator/swagger.decorator';
-import { HealthCheckDto } from './common/dtos/health-check.dto';
+import { ApiOkEnvelope } from './common/decorators/swagger.decorator';
+import { HealthCheckDto } from './common/dto/health-check.dto';
 
 @ApiTags('System & Health')
 @Controller('health')

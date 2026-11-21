@@ -1,11 +1,11 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { ImageInputDto } from '../../common/dtos/image-input.dto';
+import { ImageInputDto } from '../../common/dto/image-input.dto';
 import { OcrResultDto } from './dto/ocr-result.dto';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
-} from '../../common/decorator/swagger.decorator';
+} from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { validateImageInput } from '../../common/helpers/image-validation.helper';
 

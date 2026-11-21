@@ -1,8 +1,1 @@
-import { SetMetadata } from '@nestjs/common';
-
-export const IS_PUBLIC_KEY = 'isPublic';
-
-/**
- * Decorator to mark endpoints or controllers as public, bypassing JwtAuthGuard.
- */
-export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
+export * from '../decorators/public.decorator';

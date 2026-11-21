@@ -58,6 +58,19 @@ async function bootstrap() {
     .addTag('Indoor Navigation', 'QR-based pathfinding and routing')
     .addTag('Voice Assistant', 'Speech commands and Arabic intent detection')
     .addTag('Computer Vision', 'Object, Currency, Color, Signs, and Faces')
+    .addTag('User Preferences & Consents', 'Accessibility settings and consent tracking')
+    .addTag('Authentication', 'User registration, login, token refresh, and guest access')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT bearer token',
+        in: 'header',
+      },
+      'JWT',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

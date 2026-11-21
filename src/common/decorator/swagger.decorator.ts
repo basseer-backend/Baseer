@@ -8,7 +8,7 @@ import {
 import {
   SuccessResponseDto,
   ErrorResponseDto,
-} from '../interfaces/api-response.interface';
+} from '../interface/api-response.interface';
 
 /**
  * Decorator to wrap response DTO inside the standard Baseer SuccessResponse envelope
@@ -22,6 +22,39 @@ export function ApiOkEnvelope<T extends Type<unknown>>(
     ApiResponse({
       status: HttpStatus.OK,
       description: 'Successful operation',
+      schema: {
+        allOf: [
+          { $ref: getSchemaPath(SuccessResponseDto) },
+          {
+            properties: {
+              data: isArray
+                ? {
+                    type: 'array',
+                    items: { $ref: getSchemaPath(dataDto) },
+                  }
+                : {
+                    $ref: getSchemaPath(dataDto),
+                  },
+            },
+          },
+        ],
+      },
+    }),
+  );
+}
+
+/**
+ * Decorator to wrap created response DTO inside the standard Baseer SuccessResponse envelope (HTTP 201)
+ */
+export function ApiCreatedEnvelope<T extends Type<unknown>>(
+  dataDto: T,
+  isArray = false,
+) {
+  return applyDecorators(
+    ApiExtraModels(SuccessResponseDto, dataDto),
+    ApiResponse({
+      status: HttpStatus.CREATED,
+      description: 'Resource successfully created',
       schema: {
         allOf: [
           { $ref: getSchemaPath(SuccessResponseDto) },

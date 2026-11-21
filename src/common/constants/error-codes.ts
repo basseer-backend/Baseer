@@ -8,6 +8,7 @@ export enum AppErrorCode {
   FORBIDDEN = 'ERR_FORBIDDEN',
   NOT_FOUND = 'ERR_NOT_FOUND',
   BAD_REQUEST = 'ERR_BAD_REQUEST',
+  CONFLICT = 'ERR_CONFLICT',
   FILE_TOO_LARGE = 'ERR_FILE_TOO_LARGE',
   TOO_MANY_REQUESTS = 'ERR_TOO_MANY_REQUESTS',
   SERVICE_UNAVAILABLE = 'ERR_SERVICE_UNAVAILABLE',
@@ -35,6 +36,7 @@ export const ERROR_HTTP_STATUS: Record<AppErrorCode, HttpStatus> = {
   [AppErrorCode.FORBIDDEN]: HttpStatus.FORBIDDEN, // 403
   [AppErrorCode.NOT_FOUND]: HttpStatus.NOT_FOUND, // 404
   [AppErrorCode.BAD_REQUEST]: HttpStatus.BAD_REQUEST, // 400
+  [AppErrorCode.CONFLICT]: HttpStatus.CONFLICT, // 409
   [AppErrorCode.FILE_TOO_LARGE]: HttpStatus.PAYLOAD_TOO_LARGE, // 413
   [AppErrorCode.TOO_MANY_REQUESTS]: HttpStatus.TOO_MANY_REQUESTS, // 429
   [AppErrorCode.SERVICE_UNAVAILABLE]: HttpStatus.SERVICE_UNAVAILABLE, // 503
@@ -62,6 +64,7 @@ export const ERROR_MESSAGES: Record<AppErrorCode, string> = {
   [AppErrorCode.FORBIDDEN]: 'غير مصرح لك بالوصول لهذا المورد',
   [AppErrorCode.NOT_FOUND]: 'المورد المطلوب غير موجود',
   [AppErrorCode.BAD_REQUEST]: 'طلب غير صحيح',
+  [AppErrorCode.CONFLICT]: 'البيانات المدخلة موجودة مسبقاً في النظام',
   [AppErrorCode.FILE_TOO_LARGE]: 'حجم الصورة كبير جداً وتجاوز الحد الأقصى',
   [AppErrorCode.TOO_MANY_REQUESTS]: 'طلبات كثيرة جداً، يرجى الانتظار قليلاً',
   [AppErrorCode.SERVICE_UNAVAILABLE]: 'الخدمة غير متوفرة حالياً، حاول لاحقاً',

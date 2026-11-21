@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 422,
+  "errorCode": "ERR_INTENT_NOT_RECOGNIZED",
+  "message": "عذراً، لم أفهم طلبك، يرجى المحاولة بصيغة أخرى",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

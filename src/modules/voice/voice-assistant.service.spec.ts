@@ -68,7 +68,7 @@ describe('VoiceAssistantService', () => {
       expect(result.actionToTriggerOnMobile).toBe(MobileAction.OPEN_CAMERA_OCR);
       expect(result.confidence).toBe(0.954);
       expect(result.spokenResponse).toBe('سأقرأ الورقة لك حالاً');
-      expect(result.requiresClarification).toBe(false);
+      expect(result.requiresClarification).toBeFalsy();
       expect(result.entities).toEqual({ target: 'document' });
     });
 

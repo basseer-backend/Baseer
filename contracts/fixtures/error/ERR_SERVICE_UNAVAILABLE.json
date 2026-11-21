@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 503,
+  "errorCode": "ERR_SERVICE_UNAVAILABLE",
+  "message": "الخدمة غير متوفرة حالياً، حاول لاحقاً",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

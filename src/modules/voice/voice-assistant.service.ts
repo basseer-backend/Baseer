@@ -39,7 +39,7 @@ export class VoiceAssistantService {
     }
 
     this.logger.debug(
-      `[VoiceAssistantService] Processing voice query: "${speechText.slice(0, 50)}..."`,
+      `[VoiceAssistantService] Processing voice command (length: ${speechText.length}, language: ${dto.language || 'ar-EG'}, correlationId: ${correlationId || 'none'})`,
     );
 
     // 1. Delegate intent classification to the AI Agent integration client
@@ -59,8 +59,11 @@ export class VoiceAssistantService {
       confidence: aiResult.confidence,
       spokenResponse: mapping.spokenResponse,
       actionToTriggerOnMobile: mapping.actionToTriggerOnMobile,
-      requiresClarification: aiResult.requiresClarification,
-      entities: Object.keys(aiResult.entities).length > 0 ? aiResult.entities : undefined,
+      requiresClarification: aiResult.requiresClarification ? true : undefined,
+      entities:
+        aiResult.entities && Object.keys(aiResult.entities).length > 0
+          ? aiResult.entities
+          : undefined,
     };
   }
 }

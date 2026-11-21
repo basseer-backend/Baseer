@@ -10,6 +10,7 @@ import {
 } from './ai-agent.interface';
 import { AppException } from '../../../common/exceptions/app.exception';
 import { AppErrorCode } from '../../../common/constants/error-codes';
+import { VoiceIntent } from '../../../common/enums';
 
 @Injectable()
 export class HttpAiVoiceAgentClient
@@ -21,10 +22,15 @@ export class HttpAiVoiceAgentClient
   constructor(configService: ConfigService) {
     const baseUrl =
       configService.get<string>('AI_VOICE_AGENT_URL') ||
+      configService.get<string>('AI_AGENT_URL') ||
       'http://localhost:8000/api/v1';
-    const apiKey = configService.get<string>('AI_VOICE_AGENT_API_KEY');
+    const apiKey =
+      configService.get<string>('AI_VOICE_AGENT_API_KEY') ||
+      configService.get<string>('AI_AGENT_API_KEY');
     const timeoutMs = parseInt(
-      configService.get<string>('AI_VOICE_AGENT_TIMEOUT_MS') || '4000',
+      configService.get<string>('AI_VOICE_AGENT_TIMEOUT_MS') ||
+      configService.get<string>('AI_AGENT_TIMEOUT_MS') ||
+      '4000',
       10,
     );
 
@@ -88,6 +94,9 @@ export class HttpAiVoiceAgentClient
       );
     }
     const normalizedIntent = payload.intent.trim().toUpperCase();
+    const canonicalIntents = Object.values(VoiceIntent) as string[];
+    const isCanonical = canonicalIntents.includes(normalizedIntent);
+    const finalIntent = isCanonical || normalizedIntent === 'UNKNOWN' ? normalizedIntent : 'UNKNOWN';
 
     // 2. Confidence validation: must be a finite number between 0 and 1, or strictly null
     let normalizedConfidence: number | null = null;
@@ -133,14 +142,15 @@ export class HttpAiVoiceAgentClient
         ? payload.suggestedResponse.trim()
         : null;
 
-    // 6. isSupported validation
+    // 6. isSupported validation: strictly false if not canonical Baseer intent
     const isSupported =
-      typeof payload.isSupported === 'boolean'
+      isCanonical &&
+      (typeof payload.isSupported === 'boolean'
         ? payload.isSupported
-        : normalizedIntent !== 'UNKNOWN';
+        : finalIntent !== 'UNKNOWN');
 
     return {
-      intent: normalizedIntent,
+      intent: finalIntent,
       confidence: normalizedConfidence,
       entities,
       requiresClarification,

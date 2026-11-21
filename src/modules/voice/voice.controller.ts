@@ -36,6 +36,8 @@ export class VoiceController {
   @ApiOkEnvelope(VoiceCommandResultDto)
   @ApiErrorExamples(
     AppErrorCode.INTENT_NOT_RECOGNIZED,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.SERVICE_UNAVAILABLE,
   )

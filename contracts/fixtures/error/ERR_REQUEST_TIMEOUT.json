@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 504,
+  "errorCode": "ERR_REQUEST_TIMEOUT",
+  "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

@@ -7,6 +7,8 @@
   "type": "commonjs",
   "scripts": {
     "build": "nest build",
+    "contracts:validate": "npm run build && node scripts/validate-contracts.js",
+    "contracts:test": "vitest run test/contracts.spec.ts",
     "deploy": "nest deploy",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

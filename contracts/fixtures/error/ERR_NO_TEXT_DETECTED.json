@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 422,
+  "errorCode": "ERR_NO_TEXT_DETECTED",
+  "message": "لم يتم العثور على أي نص في الصورة الملتقطة",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

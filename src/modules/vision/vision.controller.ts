@@ -6,7 +6,8 @@ import { CurrencyResultDto } from './dto/currency-result.dto';
 import { ColorResultDto } from './dto/color-result.dto';
 import { TrafficSignResultDto } from './dto/traffic-sign-result.dto';
 import { FaceExpressionResultDto } from './dto/face-expression-result.dto';
-import { ObstacleResultDto, HapticPattern } from './dto/obstacle-result.dto';
+import { ObstacleResultDto } from './dto/obstacle-result.dto';
+import { FacialExpression, HapticPattern } from '../../common/enums';
 import {
   ApiOkEnvelope,
   ApiErrorExamples,
@@ -22,13 +23,15 @@ export class VisionController {
   @ApiOperation({
     summary: 'Describe objects and general scene in front of user',
     description:
-      'Provides full Arabic contextual description of surroundings. Fake test triggers: "blurry", "dark", "unsupported", "toolarge".',
+      'Provides full Arabic contextual description of surroundings. Fake test triggers: "blurry", "dark", "unsupported", "toolarge", "lowconfidence", "timeout".',
   })
   @ApiOkEnvelope(SceneDescriptionDto)
   @ApiErrorExamples(
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )
@@ -47,13 +50,15 @@ export class VisionController {
   @ApiOperation({
     summary: 'Recognize Egyptian currency banknotes',
     description:
-      'Identifies Egyptian banknotes with value and verbal announcement. Fake test triggers: "blurry", "dark", "unsupported", "toolarge".',
+      'Identifies Egyptian banknotes with value and verbal announcement. Fake test triggers: "blurry", "dark", "unsupported", "toolarge", "lowconfidence", "timeout".',
   })
   @ApiOkEnvelope(CurrencyResultDto)
   @ApiErrorExamples(
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )
@@ -73,13 +78,15 @@ export class VisionController {
   @ApiOperation({
     summary: 'Detect dominant color of target object',
     description:
-      'Extracts dominant color name in Arabic and English with confidence score. Fake test triggers: "blurry", "dark", "unsupported", "toolarge".',
+      'Extracts dominant color name in Arabic and English with confidence score. Fake test triggers: "blurry", "dark", "unsupported", "toolarge", "lowconfidence", "timeout".',
   })
   @ApiOkEnvelope(ColorResultDto)
   @ApiErrorExamples(
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )
@@ -99,13 +106,15 @@ export class VisionController {
   @ApiOperation({
     summary: 'Recognize street traffic signs',
     description:
-      'Identifies pedestrian and street traffic safety signs. Fake test triggers: "blurry", "dark", "unsupported", "toolarge".',
+      'Identifies pedestrian and street traffic safety signs. Fake test triggers: "blurry", "dark", "unsupported", "toolarge", "lowconfidence", "timeout".',
   })
   @ApiOkEnvelope(TrafficSignResultDto)
   @ApiErrorExamples(
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )
@@ -123,20 +132,22 @@ export class VisionController {
   @ApiOperation({
     summary: 'Detect facial expressions of person in frame',
     description:
-      'Detects emotions and facial expressions for social awareness. Fake test triggers: "blurry", "dark", "unsupported", "toolarge".',
+      'Detects emotions and facial expressions for social awareness. Fake test triggers: "blurry", "dark", "unsupported", "toolarge", "lowconfidence", "timeout".',
   })
   @ApiOkEnvelope(FaceExpressionResultDto)
   @ApiErrorExamples(
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )
   detectFaceExpression(@Body() body: ImageInputDto): FaceExpressionResultDto {
     validateImageInput(body.imageBase64);
     return {
-      expression: 'Smiling / Happy',
+      expression: FacialExpression.HAPPY,
       spokenDescription: 'الشخص الذي أمامك يبتسم ويبدو سعيداً',
       confidence: 0.88,
     };
@@ -147,13 +158,15 @@ export class VisionController {
   @ApiOperation({
     summary: 'Real-time obstacle tracking and safety alert',
     description:
-      'Warns of immediate physical dangers (stairs, holes, poles) with distance and haptic pattern. Fake test triggers: "blurry", "dark", "unsupported", "toolarge".',
+      'Warns of immediate physical dangers (stairs, holes, poles) with distance and haptic pattern. Fake test triggers: "blurry", "dark", "unsupported", "toolarge", "lowconfidence", "timeout".',
   })
   @ApiOkEnvelope(ObstacleResultDto)
   @ApiErrorExamples(
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
+    AppErrorCode.LOW_CONFIDENCE,
+    AppErrorCode.REQUEST_TIMEOUT,
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )

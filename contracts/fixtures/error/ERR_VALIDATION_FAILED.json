@@ -1,0 +1,10 @@
+{
+  "success": false,
+  "statusCode": 400,
+  "errorCode": "ERR_VALIDATION_FAILED",
+  "message": "بيانات الطلب غير صالحة",
+  "details": [
+    "imageBase64 is required and cannot be empty"
+  ],
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

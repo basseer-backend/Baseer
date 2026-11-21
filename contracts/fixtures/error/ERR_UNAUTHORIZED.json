@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 401,
+  "errorCode": "ERR_UNAUTHORIZED",
+  "message": "يرجى تسجيل الدخول أولاً",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

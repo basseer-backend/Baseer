@@ -23,12 +23,13 @@ import { AI_VOICE_AGENT_CLIENT } from './clients/ai-agent.interface';
       ) => {
         const isProduction = process.env.NODE_ENV === 'production';
         const isMockEnabled =
-          configService.get<string>('AI_VOICE_AGENT_MOCK_ENABLED') === 'true';
+          configService.get<string>('AI_VOICE_AGENT_MOCK_ENABLED') === 'true' ||
+          configService.get<string>('USE_MOCK_AI_AGENT') === 'true';
 
         // Strict Production Protection: Never allow mock client in production
         if (isProduction && isMockEnabled) {
           throw new Error(
-            'CRITICAL SECURITY ERROR: AI_VOICE_AGENT_MOCK_ENABLED cannot be enabled in production!',
+            'CRITICAL SECURITY ERROR: Mock AI Agent cannot be enabled in production!',
           );
         }
 

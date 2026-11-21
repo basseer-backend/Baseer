@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "detectedLanguage": "en",
+    "extractedText": "Panadol Extra 500mg - Take 2 tablets every 8 hours after meals.",
+    "arabicSimplifiedText": "بنادول إكسترا 500 مجم - قرصين كل 8 ساعات بعد الأكل",
+    "confidence": 0.96
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

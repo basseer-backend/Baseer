@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "denomination": 50,
+    "currency": "EGP",
+    "spokenAnnouncement": "خمسون جنيهاً مصرياً",
+    "condition": "New Banknote",
+    "confidence": 0.98
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

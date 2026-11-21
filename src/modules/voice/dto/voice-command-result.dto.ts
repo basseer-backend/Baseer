@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VoiceIntent, MobileAction } from './voice-enums';
+import { VoiceIntent, MobileAction } from '../../../common/enums';
 import { AiAgentEntities } from '../clients/ai-agent.interface';
 
 export class VoiceCommandResultDto {

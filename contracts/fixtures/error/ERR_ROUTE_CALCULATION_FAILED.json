@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 422,
+  "errorCode": "ERR_ROUTE_CALCULATION_FAILED",
+  "message": "تعذر حساب المسار إلى الوجهة المطلوبة",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

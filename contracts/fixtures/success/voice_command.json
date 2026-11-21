@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "userInput": "عايز أروح مكتب العميد",
+    "detectedIntent": "INDOOR_NAVIGATION",
+    "confidence": 0.94,
+    "spokenResponse": "تحت أمرك، امسح كود الـ QR اللي جنبك وقولي عايز تروح فين",
+    "actionToTriggerOnMobile": "OPEN_CAMERA_QR"
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

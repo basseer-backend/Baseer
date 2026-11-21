@@ -70,8 +70,8 @@ export abstract class BaseAiHttpClient {
           `[${this.serviceName}] Request timed out after ${this.timeoutMs}ms for URL: ${url}`,
         );
         throw new AppException(
-          AppErrorCode.SERVICE_UNAVAILABLE,
-          'خدمة الذكاء الاصطناعي استغرقت وقتاً أطول من المسموح به، يرجى المحاولة لاحقاً',
+          AppErrorCode.REQUEST_TIMEOUT,
+          'استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى',
         );
       }
 

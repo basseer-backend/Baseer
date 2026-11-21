@@ -1,0 +1,214 @@
+{
+  "contractVersion": "1.0.0",
+  "codes": [
+    {
+      "code": "ERR_INTERNAL_SERVER_ERROR",
+      "http": 500,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "same_request",
+      "messageKey": "server_error",
+      "fallbackMessage": "The server encountered a problem. Please try again."
+    },
+    {
+      "code": "ERR_VALIDATION_FAILED",
+      "http": 400,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "none",
+      "messageKey": "invalid_request",
+      "fallbackMessage": "The request could not be sent. Please try again."
+    },
+    {
+      "code": "ERR_BAD_REQUEST",
+      "http": 400,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "none",
+      "messageKey": "invalid_request",
+      "fallbackMessage": "The request could not be sent. Please try again."
+    },
+    {
+      "code": "ERR_UNAUTHORIZED",
+      "http": 401,
+      "owner": [
+        "backend"
+      ],
+      "retry": "login",
+      "messageKey": "unauthorized",
+      "fallbackMessage": "Your session has expired. Please sign in again."
+    },
+    {
+      "code": "ERR_FORBIDDEN",
+      "http": 403,
+      "owner": [
+        "backend"
+      ],
+      "retry": "none",
+      "messageKey": "forbidden",
+      "fallbackMessage": "You do not have permission to do this."
+    },
+    {
+      "code": "ERR_NOT_FOUND",
+      "http": 404,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "none",
+      "messageKey": "not_found",
+      "fallbackMessage": "The requested item was not found."
+    },
+    {
+      "code": "ERR_FILE_TOO_LARGE",
+      "http": 413,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "image_too_large",
+      "fallbackMessage": "The image is too large. Take a new photo."
+    },
+    {
+      "code": "ERR_TOO_MANY_REQUESTS",
+      "http": 429,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "same_request",
+      "messageKey": "too_many_requests",
+      "fallbackMessage": "Too many requests. Wait a moment and try again."
+    },
+    {
+      "code": "ERR_SERVICE_UNAVAILABLE",
+      "http": 503,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "same_request",
+      "messageKey": "service_unavailable",
+      "fallbackMessage": "The service is unavailable right now. Please try again shortly."
+    },
+    {
+      "code": "ERR_REQUEST_TIMEOUT",
+      "http": 504,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "same_request",
+      "messageKey": "timeout_error",
+      "fallbackMessage": "The request took too long. Please try again."
+    },
+    {
+      "code": "ERR_IMAGE_BLURRY",
+      "http": 422,
+      "owner": [
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "image_blurry",
+      "fallbackMessage": "The image is not clear. Hold the phone steady and take a new photo."
+    },
+    {
+      "code": "ERR_IMAGE_TOO_DARK",
+      "http": 422,
+      "owner": [
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "image_too_dark",
+      "fallbackMessage": "The lighting is too low. Turn on the flash or move to a brighter place."
+    },
+    {
+      "code": "ERR_NO_TEXT_DETECTED",
+      "http": 422,
+      "owner": [
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "ocr_no_text",
+      "fallbackMessage": "No text found. Move the camera closer to the text and check the lighting."
+    },
+    {
+      "code": "ERR_UNSUPPORTED_IMAGE_FORMAT",
+      "http": 422,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "image_unsupported",
+      "fallbackMessage": "This image format is not supported. Take a new photo."
+    },
+    {
+      "code": "ERR_INTENT_NOT_RECOGNIZED",
+      "http": 422,
+      "owner": [
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "intent_unknown",
+      "fallbackMessage": "I did not understand your request. Please say it another way."
+    },
+    {
+      "code": "ERR_LOW_CONFIDENCE",
+      "http": 422,
+      "owner": [
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "low_confidence",
+      "fallbackMessage": "I could not be sure of the result. Please try again more clearly."
+    },
+    {
+      "code": "ERR_QR_NOT_FOUND",
+      "http": 404,
+      "owner": [
+        "backend"
+      ],
+      "retry": "new_capture",
+      "messageKey": "qr_not_found",
+      "fallbackMessage": "I could not find a QR code. Move the camera slowly."
+    },
+    {
+      "code": "ERR_INVALID_QR_CODE",
+      "http": 400,
+      "owner": [
+        "backend"
+      ],
+      "retry": "new_capture",
+      "messageKey": "qr_invalid",
+      "fallbackMessage": "This QR code is not valid. Try another one."
+    },
+    {
+      "code": "ERR_DESTINATION_NOT_FOUND",
+      "http": 404,
+      "owner": [
+        "backend"
+      ],
+      "retry": "none",
+      "messageKey": "destination_not_found",
+      "fallbackMessage": "This destination is not registered. Choose another one."
+    },
+    {
+      "code": "ERR_ROUTE_CALCULATION_FAILED",
+      "http": 422,
+      "owner": [
+        "backend"
+      ],
+      "retry": "same_request",
+      "messageKey": "route_failed",
+      "fallbackMessage": "The route could not be calculated. Please try again."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 400,
+  "errorCode": "ERR_BAD_REQUEST",
+  "message": "طلب غير صحيح",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

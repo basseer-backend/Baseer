@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { VoiceIntent, MobileAction } from './dto/voice-enums';
+import { VoiceIntent, MobileAction } from '../../common/enums';
 import { AiIntentClassificationResult } from './clients/ai-agent.interface';
 import { AppException } from '../../common/exceptions/app.exception';
 import { AppErrorCode } from '../../common/constants/error-codes';

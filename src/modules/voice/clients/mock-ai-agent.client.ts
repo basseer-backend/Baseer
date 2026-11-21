@@ -3,6 +3,8 @@ import {
   AiIntentClassificationResult,
   IAiVoiceAgentClient,
 } from './ai-agent.interface';
+import { AppException } from '../../../common/exceptions/app.exception';
+import { AppErrorCode } from '../../../common/constants/error-codes';
 
 /**
  * Isolated development & unit-testing mock client simulating AI Agent responses.
@@ -33,9 +35,22 @@ export class MockAiVoiceAgentClient implements IAiVoiceAgentClient {
     _correlationId?: string,
   ): Promise<AiIntentClassificationResult> {
     this.assertNotProduction();
-    this.logger.debug(`[MOCK AI AGENT] Simulating intent classification for: "${text}"`);
+    this.logger.debug(
+      `[MOCK AI AGENT] Simulating intent classification (length: ${text.length}, correlationId: ${_correlationId || 'none'})`,
+    );
 
     const normalized = text.trim().toLowerCase();
+
+    // Fake test triggers for contracts and manual testing
+    if (normalized === 'lowconfidence') {
+      throw new AppException(AppErrorCode.LOW_CONFIDENCE);
+    }
+    if (normalized === 'timeout') {
+      throw new AppException(AppErrorCode.REQUEST_TIMEOUT);
+    }
+    if (normalized === 'unavailable') {
+      throw new AppException(AppErrorCode.SERVICE_UNAVAILABLE);
+    }
 
     // Case 3: Requires Clarification simulation (User wants navigation but mentions no destination)
     if (
@@ -135,7 +150,7 @@ export class MockAiVoiceAgentClient implements IAiVoiceAgentClient {
       return {
         intent: 'INDOOR_NAVIGATION',
         confidence: 0.94,
-        entities: { destination: 'office' },
+        entities: {},
         requiresClarification: false,
         suggestedResponse: 'تحت أمرك، امسح كود الـ QR اللي جنبك وقولي عايز تروح فين',
         isSupported: true,

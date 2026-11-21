@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 404,
+  "errorCode": "ERR_NOT_FOUND",
+  "message": "المورد المطلوب غير موجود",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

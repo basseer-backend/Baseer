@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "signName": "Pedestrian Crossing",
+    "spokenMeaning": "إشارة عبور مشاة، يمكنك العبور بحذر",
+    "confidence": 0.91
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

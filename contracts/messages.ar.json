@@ -1,0 +1,26 @@
+{
+  "contractVersion": "1.0.0",
+  "locale": "ar",
+  "messages": {
+    "ERR_INTERNAL_SERVER_ERROR": "حدث خطأ غير متوقع في الخادم",
+    "ERR_VALIDATION_FAILED": "بيانات الطلب غير صالحة",
+    "ERR_BAD_REQUEST": "طلب غير صحيح",
+    "ERR_UNAUTHORIZED": "يرجى تسجيل الدخول أولاً",
+    "ERR_FORBIDDEN": "غير مصرح لك بالوصول لهذا المورد",
+    "ERR_NOT_FOUND": "المورد المطلوب غير موجود",
+    "ERR_FILE_TOO_LARGE": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+    "ERR_TOO_MANY_REQUESTS": "طلبات كثيرة جداً، يرجى الانتظار قليلاً",
+    "ERR_SERVICE_UNAVAILABLE": "الخدمة غير متوفرة حالياً، حاول لاحقاً",
+    "ERR_REQUEST_TIMEOUT": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+    "ERR_IMAGE_BLURRY": "الصورة مشوشة أو غير واضحة، يرجى إعادة التقاطها بثبات",
+    "ERR_IMAGE_TOO_DARK": "الإضاءة ضعيفة جداً، يرجى تشغيل الفلاش أو الانتقال لمكان مضيء",
+    "ERR_NO_TEXT_DETECTED": "لم يتم العثور على أي نص في الصورة الملتقطة",
+    "ERR_UNSUPPORTED_IMAGE_FORMAT": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
+    "ERR_INTENT_NOT_RECOGNIZED": "عذراً، لم أفهم طلبك، يرجى المحاولة بصيغة أخرى",
+    "ERR_LOW_CONFIDENCE": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
+    "ERR_QR_NOT_FOUND": "لم يتم العثور على أي كود QR في الإطار",
+    "ERR_INVALID_QR_CODE": "كود الـ QR غير صالح أو تالف",
+    "ERR_DESTINATION_NOT_FOUND": "المكان أو الوجهة المطلوبة غير مسجلة بالنظام",
+    "ERR_ROUTE_CALCULATION_FAILED": "تعذر حساب المسار إلى الوجهة المطلوبة"
+  }
+}

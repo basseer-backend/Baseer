@@ -1,0 +1,15 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "description": "أمامك طاولة خشبية عليها زجاجة ماء ومفتاح، وعلى يمينك مقعد فارغ",
+    "detectedObjects": [
+      "table",
+      "bottle",
+      "key",
+      "chair"
+    ],
+    "confidence": 0.92
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

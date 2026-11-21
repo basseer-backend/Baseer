@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "expression": "HAPPY",
+    "spokenDescription": "الشخص الذي أمامك يبتسم ويبدو سعيداً",
+    "confidence": 0.88
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

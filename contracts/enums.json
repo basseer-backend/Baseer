@@ -1,0 +1,34 @@
+{
+  "VoiceIntent": [
+    "READ_DOCUMENT",
+    "RECOGNIZE_CURRENCY",
+    "INDOOR_NAVIGATION",
+    "DESCRIBE_SCENE",
+    "DETECT_COLOR",
+    "READ_TRAFFIC_SIGN",
+    "DETECT_OBSTACLE",
+    "DETECT_EXPRESSION"
+  ],
+  "MobileAction": [
+    "OPEN_CAMERA_OCR",
+    "OPEN_CAMERA_CURRENCY",
+    "OPEN_CAMERA_QR",
+    "OPEN_CAMERA_DESCRIBE",
+    "OPEN_CAMERA_COLOR",
+    "OPEN_CAMERA_TRAFFIC_SIGN",
+    "OPEN_CAMERA_OBSTACLE",
+    "OPEN_CAMERA_EXPRESSION"
+  ],
+  "FacialExpression": [
+    "HAPPY",
+    "NEUTRAL",
+    "SAD",
+    "SURPRISED",
+    "ANGRY"
+  ],
+  "HapticPattern": [
+    "NONE",
+    "LIGHT_VIBRATION",
+    "STRONG_VIBRATION"
+  ]
+}

@@ -142,6 +142,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         return AppErrorCode.TOO_MANY_REQUESTS;
       case HttpStatus.SERVICE_UNAVAILABLE:
         return AppErrorCode.SERVICE_UNAVAILABLE;
+      case HttpStatus.GATEWAY_TIMEOUT:
+        return AppErrorCode.REQUEST_TIMEOUT;
       default:
         return AppErrorCode.INTERNAL_SERVER_ERROR;
     }

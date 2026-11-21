@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "startLocation": "المدخل الرئيسي - بوابة رقم 1",
+    "targetDestination": "مكتب شؤون الطلبة",
+    "destinationId": "dept-affairs",
+    "estimatedDistanceMeters": 30,
+    "totalSteps": 3,
+    "voiceInstructions": [
+      "تحرك للأمام 10 خطوات مستقيماً",
+      "استدر يميناً عند الممر الرئيسي",
+      "وجهتك هي الباب الثاني على يسارك (مكتب شؤون الطلبة)"
+    ]
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

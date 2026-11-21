@@ -1,12 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export enum FacialExpression {
-  HAPPY = 'Smiling / Happy',
-  NEUTRAL = 'Neutral',
-  SAD = 'Sad',
-  SURPRISED = 'Surprised',
-  ANGRY = 'Angry',
-}
+import { FacialExpression } from '../../../common/enums';
 
 export class FaceExpressionResultDto {
   @ApiProperty({
@@ -14,7 +7,7 @@ export class FaceExpressionResultDto {
     example: FacialExpression.HAPPY,
     description: 'Facial expression description',
   })
-  expression: FacialExpression | string;
+  expression: FacialExpression;
 
   @ApiProperty({
     example: 'الشخص الذي أمامك يبتسم ويبدو سعيداً',

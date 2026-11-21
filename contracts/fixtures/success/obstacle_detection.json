@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "hazardDetected": true,
+    "obstacleType": "درج / سلم هابط",
+    "distanceMeters": 1.2,
+    "hapticAlertPattern": "STRONG_VIBRATION",
+    "spokenWarning": "انتبه! أمامك درجات سلم على بعد خطوتين",
+    "confidence": 0.93
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

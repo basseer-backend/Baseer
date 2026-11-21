@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 413,
+  "errorCode": "ERR_FILE_TOO_LARGE",
+  "message": "حجم الصورة كبير جداً وتجاوز الحد الأقصى",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

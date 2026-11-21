@@ -1,0 +1,27 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": [
+    {
+      "id": "dept-affairs",
+      "name": "مكتب شؤون الطلبة"
+    },
+    {
+      "id": "lab-01",
+      "name": "المعمل الرئيسي (Lab 1)"
+    },
+    {
+      "id": "restroom",
+      "name": "دورة المياه (حمامات)"
+    },
+    {
+      "id": "dean-office",
+      "name": "مكتب العميد"
+    },
+    {
+      "id": "library",
+      "name": "المكتبة المركزية"
+    }
+  ],
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 403,
+  "errorCode": "ERR_FORBIDDEN",
+  "message": "غير مصرح لك بالوصول لهذا المورد",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

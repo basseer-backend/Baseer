@@ -34,6 +34,873 @@
         ]
       }
     },
+    "/api/v1/auth/guest": {
+      "post": {
+        "description": "Creates a user and issues scoped guest access & refresh tokens with session persistence for assistive access.",
+        "operationId": "AuthController_guest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GuestAuthDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Resource successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/AuthResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Create anonymous guest session",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "description": "Verifies refresh token signature and session, enforces token rotation, detects reuse attacks, and issues new tokens.",
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TokenBundleDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Refresh access token",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "description": "Revokes the specified refresh token or all active sessions for the authenticated user.",
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Logout user session",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "description": "Returns the safe profile of the currently authenticated user matching the Baseer database schema.",
+        "operationId": "AuthController_getMe",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserProfileDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Get current authenticated user profile",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/users/me/preferences": {
+      "get": {
+        "description": "Returns current TTS speech rate, contrast, haptic feedback, and wake-word settings. Returns defaults if not yet configured.",
+        "operationId": "PreferencesController_getPreferences",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserPreferencesResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Get authenticated user's accessibility preferences",
+        "tags": [
+          "User Preferences & Consents"
+        ]
+      },
+      "put": {
+        "description": "Creates or partially updates speech rate, contrast, haptic feedback, and wake-word preferences.",
+        "operationId": "PreferencesController_updatePreferences",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserPreferencesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserPreferencesResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Update authenticated user's accessibility preferences",
+        "tags": [
+          "User Preferences & Consents"
+        ]
+      }
+    },
+    "/api/v1/users/me/consents": {
+      "get": {
+        "description": "Returns the user consent choices for cloud AI, diagnostic analytics, and privacy policy versioning.",
+        "operationId": "PreferencesController_getConsents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserConsentsResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Get authenticated user's privacy and data processing consents",
+        "tags": [
+          "User Preferences & Consents"
+        ]
+      },
+      "put": {
+        "description": "Accepts or rejects consent categories in an atomic transaction. Enforces strict policy version tracking and non-inheritance across policy version upgrades. Note: Following the current relational schema design (user_preferences table), only the latest active consent state is stored per user; historical consent audit records require an append-only table.",
+        "operationId": "PreferencesController_updateConsents",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserConsentsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/UserConsentsResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Record or update authenticated user's consent choices",
+        "tags": [
+          "User Preferences & Consents"
+        ]
+      }
+    },
     "/api/v1/navigation/destinations": {
       "get": {
         "operationId": "NavigationController_getDestinations",
@@ -1482,10 +2349,28 @@
     {
       "name": "Computer Vision",
       "description": "Object, Currency, Color, Signs, and Faces"
+    },
+    {
+      "name": "User Preferences & Consents",
+      "description": "Accessibility settings and consent tracking"
+    },
+    {
+      "name": "Authentication",
+      "description": "User registration, login, token refresh, and guest access"
     }
   ],
   "servers": [],
   "components": {
+    "securitySchemes": {
+      "JWT": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "Enter JWT bearer token",
+        "in": "header"
+      }
+    },
     "schemas": {
       "SuccessResponseDto": {
         "type": "object",
@@ -1548,6 +2433,7 @@
               "ERR_FORBIDDEN",
               "ERR_NOT_FOUND",
               "ERR_BAD_REQUEST",
+              "ERR_CONFLICT",
               "ERR_FILE_TOO_LARGE",
               "ERR_TOO_MANY_REQUESTS",
               "ERR_SERVICE_UNAVAILABLE",
@@ -1587,6 +2473,334 @@
           "errorCode",
           "message",
           "timestamp"
+        ]
+      },
+      "UserProfileDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "11111111-1111-1111-1111-111111111111"
+          },
+          "isGuest": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether the user is an anonymous guest"
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "example": "ar-EG",
+            "enum": [
+              "ar-EG",
+              "en-US"
+            ],
+            "description": "User preferred language"
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2026-11-16T00:00:00.000Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-11-16T00:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "isGuest",
+          "preferredLanguage",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "TokenBundleDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "Short-lived access token used for Bearer authentication"
+          },
+          "refreshToken": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "Long-lived refresh token used to obtain new access tokens"
+          },
+          "tokenType": {
+            "type": "string",
+            "example": "Bearer"
+          },
+          "expiresIn": {
+            "type": "number",
+            "example": 900,
+            "description": "Access token expiration in seconds"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "tokenType",
+          "expiresIn"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/UserProfileDto"
+          },
+          "tokens": {
+            "$ref": "#/components/schemas/TokenBundleDto"
+          }
+        },
+        "required": [
+          "user",
+          "tokens"
+        ]
+      },
+      "GuestAuthDto": {
+        "type": "object",
+        "properties": {
+          "preferredLanguage": {
+            "type": "string",
+            "example": "ar-EG",
+            "enum": [
+              "ar-EG",
+              "en-US"
+            ],
+            "default": "ar-EG",
+            "description": "Preferred interface language for guest user"
+          },
+          "devicePlatform": {
+            "type": "string",
+            "example": "flutter",
+            "description": "Device operating platform"
+          }
+        }
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Current valid refresh token"
+          },
+          "devicePlatform": {
+            "type": "string",
+            "example": "android",
+            "description": "Device operating platform"
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "LogoutDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token to revoke. If omitted, revokes current session."
+          }
+        }
+      },
+      "UserPreferencesResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "speechRate": {
+            "type": "number",
+            "example": 1,
+            "minimum": 0.5,
+            "maximum": 3
+          },
+          "highContrastEnabled": {
+            "type": "boolean",
+            "example": false
+          },
+          "hapticEnabled": {
+            "type": "boolean",
+            "example": true
+          },
+          "hapticIntensity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "example": "medium"
+          },
+          "voiceWakeWordEnabled": {
+            "type": "boolean",
+            "example": false
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-11-15T20:00:00.000Z"
+          }
+        },
+        "required": [
+          "userId",
+          "speechRate",
+          "highContrastEnabled",
+          "hapticEnabled",
+          "hapticIntensity",
+          "voiceWakeWordEnabled",
+          "updatedAt"
+        ]
+      },
+      "UpdateUserPreferencesDto": {
+        "type": "object",
+        "properties": {
+          "speechRate": {
+            "type": "number",
+            "example": 1.25,
+            "minimum": 0.5,
+            "maximum": 3,
+            "description": "Speech rate for TTS announcements between 0.50 and 3.00"
+          },
+          "highContrastEnabled": {
+            "type": "boolean",
+            "example": true,
+            "description": "Enable high contrast color scheme on mobile application"
+          },
+          "hapticEnabled": {
+            "type": "boolean",
+            "example": true,
+            "description": "Enable haptic vibration feedback for warnings and obstacles"
+          },
+          "hapticIntensity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "example": "medium",
+            "description": "Vibration feedback intensity: 'low', 'medium', or 'high'"
+          },
+          "voiceWakeWordEnabled": {
+            "type": "boolean",
+            "example": false,
+            "description": "Enable voice wake word detection (Hey Baseer / بصير)"
+          }
+        }
+      },
+      "UserConsentItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "consentType": {
+            "type": "string",
+            "enum": [
+              "cloud_ai",
+              "diagnostics",
+              "privacy_policy"
+            ],
+            "example": "cloud_ai",
+            "description": "Consent type identifier"
+          },
+          "accepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether this consent is actively granted"
+          },
+          "policyVersion": {
+            "type": "object",
+            "example": "1.0",
+            "nullable": true,
+            "description": "Policy version corresponding to this consent response"
+          },
+          "updatedAt": {
+            "type": "object",
+            "example": "2026-11-15T20:00:00.000Z",
+            "nullable": true,
+            "description": "Timestamp when this consent was recorded or updated"
+          }
+        },
+        "required": [
+          "consentType",
+          "accepted",
+          "policyVersion",
+          "updatedAt"
+        ]
+      },
+      "UserConsentsResponseDto": {
+        "type": "object",
+        "properties": {
+          "policyVersion": {
+            "type": "object",
+            "example": "1.0",
+            "nullable": true,
+            "description": "Latest policy version consented or evaluated by the user"
+          },
+          "updatedAt": {
+            "type": "object",
+            "example": "2026-11-15T20:00:00.000Z",
+            "nullable": true,
+            "description": "Timestamp when consent choices last changed"
+          },
+          "consents": {
+            "description": "Array of consent statuses per category",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserConsentItemResponseDto"
+            }
+          }
+        },
+        "required": [
+          "policyVersion",
+          "updatedAt",
+          "consents"
+        ]
+      },
+      "ConsentItemDto": {
+        "type": "object",
+        "properties": {
+          "consentType": {
+            "type": "string",
+            "enum": [
+              "cloud_ai",
+              "diagnostics",
+              "privacy_policy"
+            ],
+            "example": "cloud_ai",
+            "description": "Consent category: 'cloud_ai', 'diagnostics', or 'privacy_policy'"
+          },
+          "accepted": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether the user explicitly accepted or rejected this consent"
+          },
+          "policyVersion": {
+            "type": "string",
+            "example": "1.0",
+            "maxLength": 32,
+            "description": "Version identifier of the policy the user responded to"
+          }
+        },
+        "required": [
+          "consentType",
+          "accepted",
+          "policyVersion"
+        ]
+      },
+      "UpdateUserConsentsDto": {
+        "type": "object",
+        "properties": {
+          "consents": {
+            "description": "List of consent records to save atomically",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConsentItemDto"
+            }
+          }
+        },
+        "required": [
+          "consents"
         ]
       },
       "DestinationDto": {

@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { VoiceIntent, MobileAction } from './voice-enums';
+import { AiAgentEntities } from '../clients/ai-agent.interface';
 
 export class VoiceCommandResultDto {
   @ApiProperty({
@@ -16,10 +17,13 @@ export class VoiceCommandResultDto {
   detectedIntent: VoiceIntent;
 
   @ApiProperty({
+    type: Number,
     example: 0.94,
-    description: 'Confidence score of intent classification (0 to 1)',
+    nullable: true,
+    description:
+      'Confidence score of intent classification (0 to 1), or null if model does not supply genuine score',
   })
-  confidence: number;
+  confidence: number | null;
 
   @ApiProperty({
     example: 'تمام، وجه الكاميرا نحو الورقة وسأقرأها لك حالاً',
@@ -30,7 +34,23 @@ export class VoiceCommandResultDto {
   @ApiProperty({
     enum: MobileAction,
     example: MobileAction.OPEN_CAMERA_OCR,
-    description: 'Specific mobile screen or camera mode to automatically trigger',
+    nullable: true,
+    description:
+      'Specific mobile camera or screen mode to automatically trigger. Null when command requires user clarification.',
   })
-  actionToTriggerOnMobile: MobileAction;
+  actionToTriggerOnMobile: MobileAction | null;
+
+  @ApiPropertyOptional({
+    example: false,
+    default: false,
+    description:
+      'Indicates whether the assistant requires verbal clarification from the user before executing an action',
+  })
+  requiresClarification?: boolean;
+
+  @ApiPropertyOptional({
+    example: { target: 'document' },
+    description: 'Extracted semantic entities or missing slot indicators',
+  })
+  entities?: AiAgentEntities;
 }

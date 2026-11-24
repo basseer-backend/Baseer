@@ -1300,6 +1300,296 @@
         ]
       }
     },
+    "/api/v1/deletion/requests": {
+      "post": {
+        "description": "Creates an asynchronous account deletion request. Requires JWT authentication and an Idempotency-Key header. Returns 201 Created on initial creation with a one-time capability secret, or 200 OK on duplicate replay (without secret).",
+        "operationId": "DeletionController_create",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Client-provided UUID or unique string ensuring idempotent request handling",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeletionRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeletionRequestResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Resource successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeletionRequestResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_BAD_REQUEST": {
+                    "summary": "ERR_BAD_REQUEST",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_BAD_REQUEST",
+                      "message": "طلب غير صحيح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Request account deletion (Idempotent)",
+        "tags": [
+          "Account Deletion"
+        ]
+      }
+    },
+    "/api/v1/deletion/requests/{id}": {
+      "get": {
+        "description": "Retrieves the status and stage progression of an account deletion request using the capability secret. Requires NO user session and continues working after the user record is purged.",
+        "operationId": "DeletionController_getStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Deletion-Capability",
+            "in": "header",
+            "description": "High-entropy capability secret issued upon deletion request acceptance",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeletionStatusResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_BAD_REQUEST": {
+                    "summary": "ERR_BAD_REQUEST",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_BAD_REQUEST",
+                      "message": "طلب غير صحيح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check account deletion status (Capability-authenticated)",
+        "tags": [
+          "Account Deletion"
+        ]
+      }
+    },
     "/api/v1/navigation/destinations": {
       "get": {
         "operationId": "NavigationController_getDestinations",
@@ -3048,6 +3338,10 @@
     {
       "name": "Tasks",
       "description": "Task lifecycle and idempotent requests"
+    },
+    {
+      "name": "Account Deletion",
+      "description": "Account deletion intake, background worker, and status checking"
     }
   ],
   "servers": [],
@@ -3586,6 +3880,104 @@
         "required": [
           "clientTaskId",
           "taskType"
+        ]
+      },
+      "DeletionRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique deletion request identifier (receipt ID)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current lifecycle status of the deletion request",
+            "example": "ACCEPTED",
+            "enum": [
+              "ACCEPTED",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "capability": {
+            "type": "object",
+            "description": "High-entropy capability secret required to check deletion status. Returned ONLY once upon creation. Store securely on client.",
+            "example": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "nullable": true
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the deletion request was accepted into the system",
+            "example": "2026-11-22T20:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "capability",
+          "acceptedAt"
+        ]
+      },
+      "CreateDeletionRequestDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "DeletionStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique deletion request identifier (receipt ID)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the deletion request",
+            "example": "COMPLETED",
+            "enum": [
+              "ACCEPTED",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "stageStatus": {
+            "type": "object",
+            "description": "Granular status of individual deletion stages",
+            "example": {
+              "revoke_sessions": "COMPLETED"
+            },
+            "additionalProperties": true
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the deletion request was accepted",
+            "example": "2026-11-22T20:00:00.000Z"
+          },
+          "completedAt": {
+            "type": "object",
+            "description": "Timestamp when account deletion was fully completed",
+            "example": "2026-11-22T20:00:05.000Z",
+            "nullable": true
+          },
+          "failureCode": {
+            "type": "object",
+            "description": "Non-sensitive failure code if the request failed",
+            "example": null,
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "stageStatus",
+          "acceptedAt",
+          "completedAt",
+          "failureCode"
         ]
       },
       "DestinationDto": {

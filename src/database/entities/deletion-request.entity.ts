@@ -97,6 +97,24 @@ export class DeletionRequest {
   @Column({ name: 'completed_at', type: 'timestamptz', nullable: true })
   completedAt: Date | null;
 
+  @Column({ name: 'locked_by', type: 'varchar', length: 64, nullable: true })
+  lockedBy: string | null;
+
+  @Column({ name: 'locked_at', type: 'timestamptz', nullable: true })
+  lockedAt: Date | null;
+
+  @Column({ name: 'lease_expires_at', type: 'timestamptz', nullable: true })
+  leaseExpiresAt: Date | null;
+
+  @Column({ name: 'attempt_count', type: 'smallint', default: 0 })
+  attemptCount: number;
+
+  @Column({ name: 'max_attempts', type: 'smallint', default: 3 })
+  maxAttempts: number;
+
+  @Column({ name: 'next_retry_at', type: 'timestamptz', nullable: true })
+  nextRetryAt: Date | null;
+
   @OneToMany(
     () => DeletionAuditEvent,
     (auditEvent) => auditEvent.deletionRequest,

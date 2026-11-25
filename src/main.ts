@@ -60,6 +60,8 @@ async function bootstrap() {
     .addTag('Computer Vision', 'Object, Currency, Color, Signs, and Faces')
     .addTag('User Preferences & Consents', 'Accessibility settings and consent tracking')
     .addTag('Authentication', 'User registration, login, token refresh, and guest access')
+    .addTag('Tasks', 'Task lifecycle and idempotent requests')
+    .addTag('Account Deletion', 'Account deletion intake, background worker, and status checking')
     .addBearerAuth(
       {
         type: 'http',

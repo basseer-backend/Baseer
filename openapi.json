@@ -901,6 +901,695 @@
         ]
       }
     },
+    "/api/v1/tasks": {
+      "post": {
+        "description": "Creates a new task execution or returns an existing one if the clientTaskId matches. Returns 201 Created on new task, or 200 OK on duplicate request.",
+        "operationId": "TasksController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Resource successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_BAD_REQUEST": {
+                    "summary": "ERR_BAD_REQUEST",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_BAD_REQUEST",
+                      "message": "طلب غير صحيح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Create or retrieve task execution (Idempotent)",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/v1/tasks/{id}": {
+      "get": {
+        "description": "Retrieves the status, execution metadata, and timings for a task belonging to the authenticated user.",
+        "operationId": "TasksController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Get task execution details",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/v1/tasks/{id}/cancel": {
+      "post": {
+        "description": "Cancels an active task execution. Safe to repeat if already cancelled. Returns 400 Bad Request if task is completed or failed.",
+        "operationId": "TasksController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_BAD_REQUEST": {
+                    "summary": "ERR_BAD_REQUEST",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_BAD_REQUEST",
+                      "message": "طلب غير صحيح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Cancel task execution",
+        "tags": [
+          "Tasks"
+        ]
+      }
+    },
+    "/api/v1/deletion/requests": {
+      "post": {
+        "description": "Creates an asynchronous account deletion request. Requires JWT authentication and an Idempotency-Key header. Returns 201 Created on initial creation with a one-time capability secret, or 200 OK on duplicate replay (without secret).",
+        "operationId": "DeletionController_create",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "description": "Client-provided UUID or unique string ensuring idempotent request handling",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDeletionRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeletionRequestResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Resource successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeletionRequestResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_BAD_REQUEST": {
+                    "summary": "ERR_BAD_REQUEST",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_BAD_REQUEST",
+                      "message": "طلب غير صحيح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Request account deletion (Idempotent)",
+        "tags": [
+          "Account Deletion"
+        ]
+      }
+    },
+    "/api/v1/deletion/requests/{id}": {
+      "get": {
+        "description": "Retrieves the status and stage progression of an account deletion request using the capability secret. Requires NO user session and continues working after the user record is purged.",
+        "operationId": "DeletionController_getStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Deletion-Capability",
+            "in": "header",
+            "description": "High-entropy capability secret issued upon deletion request acceptance",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/DeletionStatusResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_BAD_REQUEST": {
+                    "summary": "ERR_BAD_REQUEST",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_BAD_REQUEST",
+                      "message": "طلب غير صحيح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Error responses for HTTP 404",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_NOT_FOUND": {
+                    "summary": "ERR_NOT_FOUND",
+                    "value": {
+                      "success": false,
+                      "statusCode": 404,
+                      "errorCode": "ERR_NOT_FOUND",
+                      "message": "المورد المطلوب غير موجود",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Check account deletion status (Capability-authenticated)",
+        "tags": [
+          "Account Deletion"
+        ]
+      }
+    },
     "/api/v1/navigation/destinations": {
       "get": {
         "operationId": "NavigationController_getDestinations",
@@ -1313,9 +2002,19 @@
     },
     "/api/v1/voice/command": {
       "post": {
-        "description": "Maps spoken text to system intents and mobile triggers. If the phrase is unrecognized, throws ERR_INTENT_NOT_RECOGNIZED. Fake test triggers: \"unrecognized\", \"lowconfidence\", \"timeout\".",
+        "description": "Coordinates with the AI Agent to identify intent, map mobile triggers, and generate Arabic spoken responses.",
         "operationId": "VoiceController_processCommand",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "X-Correlation-ID",
+            "required": false,
+            "in": "header",
+            "description": "Unique trace identifier for end-to-end request tracking",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -1427,6 +2126,28 @@
               }
             }
           },
+          "503": {
+            "description": "Error responses for HTTP 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_SERVICE_UNAVAILABLE": {
+                    "summary": "ERR_SERVICE_UNAVAILABLE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 503,
+                      "errorCode": "ERR_SERVICE_UNAVAILABLE",
+                      "message": "الخدمة غير متوفرة حالياً، حاول لاحقاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "504": {
             "description": "Error responses for HTTP 504",
             "content": {
@@ -1450,7 +2171,7 @@
             }
           }
         },
-        "summary": "Process colloquial Egyptian voice command and return intent",
+        "summary": "Process voice command transcript and return classified intent",
         "tags": [
           "Voice Assistant"
         ]
@@ -2613,6 +3334,14 @@
     {
       "name": "Authentication",
       "description": "User registration, login, token refresh, and guest access"
+    },
+    {
+      "name": "Tasks",
+      "description": "Task lifecycle and idempotent requests"
+    },
+    {
+      "name": "Account Deletion",
+      "description": "Account deletion intake, background worker, and status checking"
     }
   ],
   "servers": [],
@@ -2689,7 +3418,6 @@
               "ERR_FORBIDDEN",
               "ERR_NOT_FOUND",
               "ERR_BAD_REQUEST",
-              "ERR_CONFLICT",
               "ERR_FILE_TOO_LARGE",
               "ERR_TOO_MANY_REQUESTS",
               "ERR_SERVICE_UNAVAILABLE",
@@ -3059,6 +3787,197 @@
         },
         "required": [
           "consents"
+        ]
+      },
+      "TaskResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique execution identifier (UUID)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "clientTaskId": {
+            "type": "string",
+            "description": "Client provided idempotency identifier (UUID)",
+            "example": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "Unique trace identifier for this request execution (UUID)",
+            "example": "987fcdeb-51a2-43f7-9012-3456789abcde"
+          },
+          "taskType": {
+            "type": "string",
+            "description": "Type of task executed",
+            "example": "OCR_DOCUMENT"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "CANCELLED"
+            ],
+            "description": "Current status of the task execution",
+            "example": "PENDING"
+          },
+          "processingTimeMs": {
+            "type": "number",
+            "description": "Execution processing duration in milliseconds",
+            "example": null,
+            "nullable": true
+          },
+          "errorCode": {
+            "type": "string",
+            "description": "Error code if the task execution failed",
+            "example": null,
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the task execution was created",
+            "example": "2026-11-22T12:00:00.000Z"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the task execution completed, failed, or was cancelled",
+            "example": null,
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "clientTaskId",
+          "requestId",
+          "taskType",
+          "status",
+          "processingTimeMs",
+          "errorCode",
+          "createdAt",
+          "completedAt"
+        ]
+      },
+      "CreateTaskDto": {
+        "type": "object",
+        "properties": {
+          "clientTaskId": {
+            "type": "string",
+            "description": "Unique client-generated idempotency identifier (UUID)",
+            "example": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"
+          },
+          "taskType": {
+            "type": "string",
+            "description": "Type of task to execute",
+            "example": "OCR_DOCUMENT",
+            "maxLength": 48
+          }
+        },
+        "required": [
+          "clientTaskId",
+          "taskType"
+        ]
+      },
+      "DeletionRequestResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique deletion request identifier (receipt ID)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current lifecycle status of the deletion request",
+            "example": "ACCEPTED",
+            "enum": [
+              "ACCEPTED",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "capability": {
+            "type": "object",
+            "description": "High-entropy capability secret required to check deletion status. Returned ONLY once upon creation. Store securely on client.",
+            "example": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+            "nullable": true
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the deletion request was accepted into the system",
+            "example": "2026-11-22T20:00:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "capability",
+          "acceptedAt"
+        ]
+      },
+      "CreateDeletionRequestDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "DeletionStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique deletion request identifier (receipt ID)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current status of the deletion request",
+            "example": "COMPLETED",
+            "enum": [
+              "ACCEPTED",
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED"
+            ]
+          },
+          "stageStatus": {
+            "type": "object",
+            "description": "Granular status of individual deletion stages",
+            "example": {
+              "revoke_sessions": "COMPLETED"
+            },
+            "additionalProperties": true
+          },
+          "acceptedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp when the deletion request was accepted",
+            "example": "2026-11-22T20:00:00.000Z"
+          },
+          "completedAt": {
+            "type": "object",
+            "description": "Timestamp when account deletion was fully completed",
+            "example": "2026-11-22T20:00:05.000Z",
+            "nullable": true
+          },
+          "failureCode": {
+            "type": "object",
+            "description": "Non-sensitive failure code if the request failed",
+            "example": null,
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "stageStatus",
+          "acceptedAt",
+          "completedAt",
+          "failureCode"
         ]
       },
       "DestinationDto": {

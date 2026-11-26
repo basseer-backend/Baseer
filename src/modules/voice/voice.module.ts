@@ -1,17 +1,24 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PreferencesModule } from '../preferences/preferences.module';
 import { VoiceController } from './voice.controller';
+import { VoiceTranscribeController } from './voice-transcribe.controller';
 import { VoiceAssistantService } from './voice-assistant.service';
+import { VoiceTranscriptionService } from './voice-transcription.service';
 import { VoiceActionMapperService } from './voice-action-mapper.service';
+import { VoiceAudioMulterInterceptor } from './interceptors/voice-audio-multer.interceptor';
 import { HttpAiVoiceAgentClient } from './clients/http-ai-agent.client';
 import { MockAiVoiceAgentClient } from './clients/mock-ai-agent.client';
 import { AI_VOICE_AGENT_CLIENT } from './clients/ai-agent.interface';
 
 @Module({
-  controllers: [VoiceController],
+  imports: [PreferencesModule],
+  controllers: [VoiceController, VoiceTranscribeController],
   providers: [
     VoiceAssistantService,
+    VoiceTranscriptionService,
     VoiceActionMapperService,
+    VoiceAudioMulterInterceptor,
     HttpAiVoiceAgentClient,
     MockAiVoiceAgentClient,
     {
@@ -44,6 +51,7 @@ import { AI_VOICE_AGENT_CLIENT } from './clients/ai-agent.interface';
   ],
   exports: [
     VoiceAssistantService,
+    VoiceTranscriptionService,
     VoiceActionMapperService,
     AI_VOICE_AGENT_CLIENT,
   ],

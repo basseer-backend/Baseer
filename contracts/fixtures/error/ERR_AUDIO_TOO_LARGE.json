@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 413,
+  "errorCode": "ERR_AUDIO_TOO_LARGE",
+  "message": "حجم التسجيل الصوتي كبير جداً، يرجى تسجيل أمر أقصر",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

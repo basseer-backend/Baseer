@@ -13,6 +13,24 @@ export interface AiAgentEntities {
 }
 
 /**
+ * Validated transcription result produced after runtime validation.
+ */
+export interface AiTranscriptionResult {
+  transcript: string;
+  language: string | null;
+  confidence: number | null;
+}
+
+/**
+ * Raw external payload received from the AI Agent transcription endpoint.
+ */
+export interface RawAiTranscriptionResponse {
+  transcript?: unknown;
+  language?: unknown;
+  confidence?: unknown;
+}
+
+/**
  * Validated intent classification result produced after runtime validation.
  */
 export interface AiIntentClassificationResult {
@@ -59,4 +77,10 @@ export interface IAiVoiceAgentClient {
     language?: string,
     correlationId?: string,
   ): Promise<AiIntentClassificationResult>;
+
+  transcribeAudio(
+    audio: { buffer: Buffer; mimeType: string; fileName: string },
+    language?: string,
+    correlationId?: string,
+  ): Promise<AiTranscriptionResult>;
 }

@@ -5,8 +5,10 @@ import {
   AiAgentClassificationRequest,
   AiAgentEntities,
   AiIntentClassificationResult,
+  AiTranscriptionResult,
   IAiVoiceAgentClient,
   RawAiAgentResponse,
+  RawAiTranscriptionResponse,
 } from './ai-agent.interface';
 import { AppException } from '../../../common/exceptions/app.exception';
 import { AppErrorCode } from '../../../common/constants/error-codes';
@@ -18,6 +20,8 @@ export class HttpAiVoiceAgentClient
   implements IAiVoiceAgentClient
 {
   private readonly classifyEndpoint: string;
+  private readonly transcribeEndpoint: string;
+  private readonly transcribeTimeoutMs: number;
 
   constructor(configService: ConfigService) {
     const baseUrl =
@@ -44,6 +48,17 @@ export class HttpAiVoiceAgentClient
     this.classifyEndpoint =
       configService.get<string>('AI_VOICE_AGENT_CLASSIFY_PATH') ||
       'intent/classify';
+
+    this.transcribeEndpoint =
+      configService.get<string>('AI_VOICE_AGENT_TRANSCRIBE_PATH') ||
+      'speech/transcribe';
+    const transcribeTimeout = parseInt(
+      configService.get<string>('AI_VOICE_AGENT_TRANSCRIBE_TIMEOUT_MS') ||
+      '8000',
+      10,
+    );
+    this.transcribeTimeoutMs =
+      !isNaN(transcribeTimeout) && transcribeTimeout > 0 ? transcribeTimeout : 8000;
   }
 
   /**
@@ -156,6 +171,83 @@ export class HttpAiVoiceAgentClient
       requiresClarification,
       suggestedResponse,
       isSupported,
+    };
+  }
+
+  /**
+   * Calls external AI Agent microservice over multipart HTTP for audio transcription.
+   * Performs runtime response validation before returning.
+   */
+  async transcribeAudio(
+    audio: { buffer: Buffer; mimeType: string; fileName: string },
+    language = 'ar-EG',
+    correlationId?: string,
+  ): Promise<AiTranscriptionResult> {
+    const formData = new FormData();
+    const arrayBuffer = audio.buffer.buffer.slice(
+      audio.buffer.byteOffset,
+      audio.buffer.byteOffset + audio.buffer.byteLength,
+    ) as ArrayBuffer;
+    const blob = new Blob([arrayBuffer], { type: audio.mimeType });
+    formData.append('audio', blob, audio.fileName);
+    formData.append('language', language);
+    if (correlationId) {
+      formData.append('correlationId', correlationId);
+    }
+
+    const rawResponse = await this.postMultipart<RawAiTranscriptionResponse>(
+      this.transcribeEndpoint,
+      formData,
+      correlationId,
+      this.transcribeTimeoutMs,
+    );
+
+    return this.validateTranscriptionResponse(rawResponse);
+  }
+
+  /**
+   * Strict runtime validation of AI speech transcription response.
+   */
+  validateTranscriptionResponse(raw: unknown): AiTranscriptionResult {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+      this.logger.error(
+        'Runtime validation failed: AI transcription response is not a valid JSON object',
+      );
+      throw new AppException(
+        AppErrorCode.SERVICE_UNAVAILABLE,
+        'استجابة خادم الذكاء الاصطناعي غير متطابقة مع عقد التكامل',
+      );
+    }
+
+    const payload = raw as RawAiTranscriptionResponse;
+
+    if (typeof payload.transcript !== 'string') {
+      this.logger.error('Runtime validation failed: missing or non-string transcript');
+      throw new AppException(
+        AppErrorCode.SERVICE_UNAVAILABLE,
+        'استجابة خادم الذكاء الاصطناعي تفتقد النص المستخرج',
+      );
+    }
+
+    let normalizedConfidence: number | null = null;
+    if (
+      typeof payload.confidence === 'number' &&
+      Number.isFinite(payload.confidence) &&
+      payload.confidence >= 0 &&
+      payload.confidence <= 1
+    ) {
+      normalizedConfidence = payload.confidence;
+    }
+
+    const normalizedLanguage =
+      typeof payload.language === 'string' && payload.language.trim().length > 0
+        ? payload.language.trim()
+        : null;
+
+    return {
+      transcript: payload.transcript,
+      language: normalizedLanguage,
+      confidence: normalizedConfidence,
     };
   }
 }

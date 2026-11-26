@@ -181,4 +181,135 @@ describe('HttpAiVoiceAgentClient', () => {
       await expect(client.classifyIntent('أمر صوتي')).rejects.toThrow(AppException);
     });
   });
+
+  describe('Multipart Audio Transcription (transcribeAudio)', () => {
+    const mockAudio = {
+      buffer: Buffer.from('audio-data'),
+      mimeType: 'audio/wav',
+      fileName: 'test.wav',
+    };
+
+    it('should send FormData to the right URL with Authorization and X-Correlation-ID', async () => {
+      const mockResponseBody = {
+        transcript: 'عايز أروح مكتب العميد',
+        language: 'ar-EG',
+        confidence: 0.95,
+      };
+
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => mockResponseBody,
+      });
+      global.fetch = fetchMock;
+
+      const result = await client.transcribeAudio(mockAudio, 'ar-EG', 'corr-456');
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [url, options] = fetchMock.mock.calls[0];
+      expect(url).toBe('http://ai-service.local/api/v1/speech/transcribe');
+      expect(options.method).toBe('POST');
+      expect(options.headers['Authorization']).toBe('Bearer test-secret-key');
+      expect(options.headers['X-Correlation-ID']).toBe('corr-456');
+      expect(options.body).toBeInstanceOf(FormData);
+      expect(result).toEqual({
+        transcript: 'عايز أروح مكتب العميد',
+        language: 'ar-EG',
+        confidence: 0.95,
+      });
+    });
+
+    it('should throw ERR_REQUEST_TIMEOUT on timeout with exactly one fetch call (no retries)', async () => {
+      const timeoutError = new DOMException('The operation was aborted due to timeout', 'TimeoutError');
+      const fetchMock = vi.fn().mockRejectedValue(timeoutError);
+      global.fetch = fetchMock;
+
+      try {
+        await client.transcribeAudio(mockAudio, 'ar-EG');
+        expect.unreachable('Should have thrown');
+      } catch (err: unknown) {
+        expect((err as AppException).errorCode).toBe(AppErrorCode.REQUEST_TIMEOUT);
+      }
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw ERR_SERVICE_UNAVAILABLE on network failure', async () => {
+      const networkError = new TypeError('fetch failed: ECONNRESET');
+      const fetchMock = vi.fn().mockRejectedValue(networkError);
+      global.fetch = fetchMock;
+
+      try {
+        await client.transcribeAudio(mockAudio, 'ar-EG');
+        expect.unreachable('Should have thrown');
+      } catch (err: unknown) {
+        expect((err as AppException).errorCode).toBe(AppErrorCode.SERVICE_UNAVAILABLE);
+      }
+    });
+
+    it('should throw ERR_SERVICE_UNAVAILABLE when server returns malformed non-JSON', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => {
+          throw new SyntaxError('Unexpected token <');
+        },
+      });
+      global.fetch = fetchMock;
+
+      try {
+        await client.transcribeAudio(mockAudio, 'ar-EG');
+        expect.unreachable('Should have thrown');
+      } catch (err: unknown) {
+        expect((err as AppException).errorCode).toBe(AppErrorCode.SERVICE_UNAVAILABLE);
+      }
+    });
+
+    it('should throw ERR_SERVICE_UNAVAILABLE when AI returns invalid response shape (non-object or missing transcript)', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ wrongField: 'no transcript' }),
+      });
+      global.fetch = fetchMock;
+
+      try {
+        await client.transcribeAudio(mockAudio, 'ar-EG');
+        expect.unreachable('Should have thrown');
+      } catch (err: unknown) {
+        expect((err as AppException).errorCode).toBe(AppErrorCode.SERVICE_UNAVAILABLE);
+      }
+    });
+
+    it('should pass through upstream error when AI service returns an AI-owned errorCode', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 422,
+        text: async () => JSON.stringify({ errorCode: AppErrorCode.NO_SPEECH_DETECTED }),
+      });
+      global.fetch = fetchMock;
+
+      try {
+        await client.transcribeAudio(mockAudio, 'ar-EG');
+        expect.unreachable('Should have thrown');
+      } catch (err: unknown) {
+        expect((err as AppException).errorCode).toBe(AppErrorCode.NO_SPEECH_DETECTED);
+      }
+    });
+
+    it('should throw ERR_SERVICE_UNAVAILABLE when AI returns an unknown or non-ai-owned errorCode', async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: false,
+        status: 500,
+        text: async () => JSON.stringify({ errorCode: 'UNKNOWN_EXTERNAL_ERROR' }),
+      });
+      global.fetch = fetchMock;
+
+      try {
+        await client.transcribeAudio(mockAudio, 'ar-EG');
+        expect.unreachable('Should have thrown');
+      } catch (err: unknown) {
+        expect((err as AppException).errorCode).toBe(AppErrorCode.SERVICE_UNAVAILABLE);
+      }
+    });
+  });
 });

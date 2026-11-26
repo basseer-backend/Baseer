@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   AiIntentClassificationResult,
+  AiTranscriptionResult,
   IAiVoiceAgentClient,
 } from './ai-agent.interface';
 import { AppException } from '../../../common/exceptions/app.exception';
@@ -165,6 +166,38 @@ export class MockAiVoiceAgentClient implements IAiVoiceAgentClient {
       requiresClarification: false,
       suggestedResponse: null,
       isSupported: false,
+    };
+  }
+
+  async transcribeAudio(
+    audio: { buffer: Buffer; mimeType: string; fileName: string },
+    language = 'ar-EG',
+    correlationId?: string,
+  ): Promise<AiTranscriptionResult> {
+    this.assertNotProduction();
+    this.logger.debug(
+      `[MOCK AI AGENT] Simulating speech transcription (fileName: ${audio.fileName}, mimeType: ${audio.mimeType}, size: ${audio.buffer.length}, language: ${language}, correlationId: ${correlationId || 'none'})`,
+    );
+
+    const lowerName = audio.fileName.toLowerCase();
+
+    if (lowerName.includes('timeout')) {
+      throw new AppException(AppErrorCode.REQUEST_TIMEOUT);
+    }
+    if (lowerName.includes('unavailable')) {
+      throw new AppException(AppErrorCode.SERVICE_UNAVAILABLE);
+    }
+    if (lowerName.includes('lowconfidence')) {
+      throw new AppException(AppErrorCode.LOW_CONFIDENCE);
+    }
+    if (lowerName.includes('nospeech')) {
+      throw new AppException(AppErrorCode.NO_SPEECH_DETECTED);
+    }
+
+    return {
+      transcript: 'عايز أروح مكتب العميد',
+      language,
+      confidence: 0.94,
     };
   }
 }

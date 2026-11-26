@@ -2177,6 +2177,274 @@
         ]
       }
     },
+    "/api/v1/voice/transcribe": {
+      "post": {
+        "description": "Transcribes uploaded audio recordings to text via the AI speech service, enforcing user cloud AI consent and file size/format constraints.",
+        "operationId": "VoiceTranscribeController_transcribe",
+        "parameters": [
+          {
+            "name": "X-Correlation-ID",
+            "required": false,
+            "in": "header",
+            "description": "Unique trace identifier for end-to-end request tracking",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Audio file to transcribe with optional language parameter",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "audio"
+                ],
+                "properties": {
+                  "audio": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Audio recording file (WAV, MP3, MP4, M4A, WebM, OGG up to 5MB)"
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "ar-EG",
+                      "en-US"
+                    ],
+                    "default": "ar-EG",
+                    "description": "Spoken language/dialect locale"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/VoiceTranscribeResultDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error responses for HTTP 400",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_VALIDATION_FAILED": {
+                    "summary": "ERR_VALIDATION_FAILED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 400,
+                      "errorCode": "ERR_VALIDATION_FAILED",
+                      "message": "بيانات الطلب غير صالحة",
+                      "details": [
+                        "field must be a string"
+                      ],
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Error responses for HTTP 401",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNAUTHORIZED": {
+                    "summary": "ERR_UNAUTHORIZED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 401,
+                      "errorCode": "ERR_UNAUTHORIZED",
+                      "message": "يرجى تسجيل الدخول أولاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Error responses for HTTP 403",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_CONSENT_REQUIRED": {
+                    "summary": "ERR_CONSENT_REQUIRED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 403,
+                      "errorCode": "ERR_CONSENT_REQUIRED",
+                      "message": "يلزم الموافقة على استخدام خدمات الذكاء الاصطناعي السحابية لاستخدام الأوامر الصوتية",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Error responses for HTTP 413",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_AUDIO_TOO_LARGE": {
+                    "summary": "ERR_AUDIO_TOO_LARGE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 413,
+                      "errorCode": "ERR_AUDIO_TOO_LARGE",
+                      "message": "حجم التسجيل الصوتي كبير جداً، يرجى تسجيل أمر أقصر",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Error responses for HTTP 422",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_UNSUPPORTED_AUDIO_FORMAT": {
+                    "summary": "ERR_UNSUPPORTED_AUDIO_FORMAT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_UNSUPPORTED_AUDIO_FORMAT",
+                      "message": "صيغة الملف الصوتي غير مدعومة، يرجى تسجيل الأمر مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  },
+                  "ERR_NO_SPEECH_DETECTED": {
+                    "summary": "ERR_NO_SPEECH_DETECTED",
+                    "value": {
+                      "success": false,
+                      "statusCode": 422,
+                      "errorCode": "ERR_NO_SPEECH_DETECTED",
+                      "message": "لم أسمع أي كلام واضح، يرجى المحاولة مرة أخرى بصوت أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error responses for HTTP 500",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_INTERNAL_SERVER_ERROR": {
+                    "summary": "ERR_INTERNAL_SERVER_ERROR",
+                    "value": {
+                      "success": false,
+                      "statusCode": 500,
+                      "errorCode": "ERR_INTERNAL_SERVER_ERROR",
+                      "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error responses for HTTP 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_SERVICE_UNAVAILABLE": {
+                    "summary": "ERR_SERVICE_UNAVAILABLE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 503,
+                      "errorCode": "ERR_SERVICE_UNAVAILABLE",
+                      "message": "الخدمة غير متوفرة حالياً، حاول لاحقاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "504": {
+            "description": "Error responses for HTTP 504",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_REQUEST_TIMEOUT": {
+                    "summary": "ERR_REQUEST_TIMEOUT",
+                    "value": {
+                      "success": false,
+                      "statusCode": 504,
+                      "errorCode": "ERR_REQUEST_TIMEOUT",
+                      "message": "استغرق الطلب وقتاً أطول من المعتاد، يرجى المحاولة مرة أخرى",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ],
+        "summary": "Transcribe speech audio file to text",
+        "tags": [
+          "Voice Assistant"
+        ]
+      }
+    },
     "/api/v1/vision/describe": {
       "post": {
         "description": "Provides full Arabic contextual description of surroundings. Fake test triggers: \"blurry\", \"dark\", \"unsupported\", \"toolarge\", \"lowconfidence\", \"timeout\".",
@@ -3428,6 +3696,10 @@
               "ERR_UNSUPPORTED_IMAGE_FORMAT",
               "ERR_LOW_CONFIDENCE",
               "ERR_INTENT_NOT_RECOGNIZED",
+              "ERR_CONSENT_REQUIRED",
+              "ERR_UNSUPPORTED_AUDIO_FORMAT",
+              "ERR_AUDIO_TOO_LARGE",
+              "ERR_NO_SPEECH_DETECTED",
               "ERR_QR_NOT_FOUND",
               "ERR_INVALID_QR_CODE",
               "ERR_DESTINATION_NOT_FOUND",
@@ -4140,7 +4412,8 @@
           "confidence": {
             "type": "number",
             "example": 0.94,
-            "description": "Confidence score of intent classification (0 to 1)"
+            "nullable": true,
+            "description": "Confidence score of intent classification (0 to 1), or null if model does not supply genuine score"
           },
           "spokenResponse": {
             "type": "string",
@@ -4160,7 +4433,21 @@
               "OPEN_CAMERA_EXPRESSION"
             ],
             "example": "OPEN_CAMERA_OCR",
-            "description": "Specific mobile screen or camera mode to automatically trigger"
+            "nullable": true,
+            "description": "Specific mobile camera or screen mode to automatically trigger. Null when command requires user clarification."
+          },
+          "requiresClarification": {
+            "type": "boolean",
+            "example": false,
+            "default": false,
+            "description": "Indicates whether the assistant requires verbal clarification from the user before executing an action"
+          },
+          "entities": {
+            "type": "object",
+            "example": {
+              "target": "document"
+            },
+            "description": "Extracted semantic entities or missing slot indicators"
           }
         },
         "required": [
@@ -4177,11 +4464,47 @@
           "userSpeech": {
             "type": "string",
             "example": "شوفلي الورقة دي مكتوب فيها إيه",
-            "description": "Colloquial Egyptian Arabic transcript. Fake test triggers: send \"unrecognized\" or \"unknown\" for ERR_INTENT_NOT_RECOGNIZED, \"lowconfidence\" for ERR_LOW_CONFIDENCE, or \"timeout\" for ERR_REQUEST_TIMEOUT."
+            "description": "Recognized Arabic speech transcript captured on mobile device"
+          },
+          "language": {
+            "type": "string",
+            "example": "ar-EG",
+            "enum": [
+              "ar-EG",
+              "en-US"
+            ],
+            "default": "ar-EG",
+            "description": "Spoken language/dialect locale of the speech input"
           }
         },
         "required": [
           "userSpeech"
+        ]
+      },
+      "VoiceTranscribeResultDto": {
+        "type": "object",
+        "properties": {
+          "transcript": {
+            "type": "string",
+            "example": "عايز أروح مكتب العميد",
+            "description": "Transcribed Arabic or English text from the audio input"
+          },
+          "language": {
+            "type": "string",
+            "example": "ar-EG",
+            "description": "Detected or requested speech language locale"
+          },
+          "confidence": {
+            "type": "object",
+            "example": 0.96,
+            "nullable": true,
+            "description": "Transcription confidence score between 0 and 1, or null if unavailable"
+          }
+        },
+        "required": [
+          "transcript",
+          "language",
+          "confidence"
         ]
       },
       "SceneDescriptionDto": {

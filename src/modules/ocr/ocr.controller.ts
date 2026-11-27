@@ -1,5 +1,5 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ImageInputDto } from '../../common/dto/image-input.dto';
 import { OcrResultDto } from './dto/ocr-result.dto';
 import {
@@ -8,8 +8,11 @@ import {
 } from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { validateImageInput } from '../../common/helpers/image-validation.helper';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('OCR & Documents')
+@ApiBearerAuth('JWT')
+@UseGuards(JwtAuthGuard)
 @Controller('ocr')
 export class OcrController {
   @Post('read')
@@ -21,6 +24,7 @@ export class OcrController {
   })
   @ApiOkEnvelope(OcrResultDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.NO_TEXT_DETECTED,

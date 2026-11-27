@@ -22,6 +22,10 @@ export enum AppErrorCode {
 
   // Audio & Voice Assistant Errors
   INTENT_NOT_RECOGNIZED = 'ERR_INTENT_NOT_RECOGNIZED',
+  CONSENT_REQUIRED = 'ERR_CONSENT_REQUIRED',
+  UNSUPPORTED_AUDIO_FORMAT = 'ERR_UNSUPPORTED_AUDIO_FORMAT',
+  AUDIO_TOO_LARGE = 'ERR_AUDIO_TOO_LARGE',
+  NO_SPEECH_DETECTED = 'ERR_NO_SPEECH_DETECTED',
 
   // Indoor Navigation & QR Errors
   QR_NOT_FOUND = 'ERR_QR_NOT_FOUND',
@@ -49,8 +53,12 @@ export const ERROR_HTTP_STATUS: Record<AppErrorCode, HttpStatus> = {
   [AppErrorCode.UNSUPPORTED_IMAGE_FORMAT]: HttpStatus.UNPROCESSABLE_ENTITY, // 422
   [AppErrorCode.LOW_CONFIDENCE]: HttpStatus.UNPROCESSABLE_ENTITY, // 422
 
-  // Voice (422)
+  // Voice (403, 413, 422)
   [AppErrorCode.INTENT_NOT_RECOGNIZED]: HttpStatus.UNPROCESSABLE_ENTITY, // 422
+  [AppErrorCode.CONSENT_REQUIRED]: HttpStatus.FORBIDDEN, // 403
+  [AppErrorCode.UNSUPPORTED_AUDIO_FORMAT]: HttpStatus.UNPROCESSABLE_ENTITY, // 422
+  [AppErrorCode.AUDIO_TOO_LARGE]: HttpStatus.PAYLOAD_TOO_LARGE, // 413
+  [AppErrorCode.NO_SPEECH_DETECTED]: HttpStatus.UNPROCESSABLE_ENTITY, // 422
 
   // Navigation & QR
   [AppErrorCode.INVALID_QR_CODE]: HttpStatus.BAD_REQUEST, // 400
@@ -87,6 +95,14 @@ export const ERROR_MESSAGES: Record<AppErrorCode, string> = {
   // Voice Assistant
   [AppErrorCode.INTENT_NOT_RECOGNIZED]:
     'عذراً، لم أفهم طلبك، يرجى المحاولة بصيغة أخرى',
+  [AppErrorCode.CONSENT_REQUIRED]:
+    'يلزم الموافقة على استخدام خدمات الذكاء الاصطناعي السحابية لاستخدام الأوامر الصوتية',
+  [AppErrorCode.UNSUPPORTED_AUDIO_FORMAT]:
+    'صيغة الملف الصوتي غير مدعومة، يرجى تسجيل الأمر مرة أخرى',
+  [AppErrorCode.AUDIO_TOO_LARGE]:
+    'حجم التسجيل الصوتي كبير جداً، يرجى تسجيل أمر أقصر',
+  [AppErrorCode.NO_SPEECH_DETECTED]:
+    'لم أسمع أي كلام واضح، يرجى المحاولة مرة أخرى بصوت أوضح',
 
   // Indoor Navigation & QR
   [AppErrorCode.QR_NOT_FOUND]: 'لم يتم العثور على أي كود QR في الإطار',
@@ -200,6 +216,30 @@ export const ERROR_META: Record<
     messageKey: 'intent_unknown',
     fallbackMessage:
       'I did not understand your request. Please say it another way.',
+  },
+  [AppErrorCode.CONSENT_REQUIRED]: {
+    owner: ['backend'],
+    retry: 'none',
+    messageKey: 'consent_required',
+    fallbackMessage: 'Cloud AI consent is required to use voice commands.',
+  },
+  [AppErrorCode.UNSUPPORTED_AUDIO_FORMAT]: {
+    owner: ['backend', 'ai'],
+    retry: 'new_capture',
+    messageKey: 'audio_unsupported',
+    fallbackMessage: 'This audio format is not supported. Record again.',
+  },
+  [AppErrorCode.AUDIO_TOO_LARGE]: {
+    owner: ['backend', 'ai'],
+    retry: 'new_capture',
+    messageKey: 'audio_too_large',
+    fallbackMessage: 'The recording is too large. Record a shorter command.',
+  },
+  [AppErrorCode.NO_SPEECH_DETECTED]: {
+    owner: ['ai'],
+    retry: 'new_capture',
+    messageKey: 'speech_not_detected',
+    fallbackMessage: 'I could not hear any clear speech. Please try again.',
   },
   [AppErrorCode.LOW_CONFIDENCE]: {
     owner: ['ai'],

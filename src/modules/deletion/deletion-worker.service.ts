@@ -53,8 +53,28 @@ export class DeletionWorkerService
   ) {}
 
   onModuleInit(): void {
+    if (!this.isWorkerEnabled()) {
+      this.logger.log(
+        `DeletionWorkerService is DISABLED by configuration (DELETION_WORKER_ENABLED=false). Background worker will not start.`,
+      );
+      return;
+    }
     this.logger.log(`Starting DeletionWorkerService (${this.workerId})...`);
     this.scheduleNextPoll(1000); // Initial start delay
+  }
+
+  /**
+   * Evaluates whether the deletion worker background loop is enabled.
+   * Defaults to true if DELETION_WORKER_ENABLED is unset or empty.
+   * Explicitly set to 'false' or '0' disables all polling, triggers, and job execution.
+   */
+  isWorkerEnabled(): boolean {
+    const raw = process.env.DELETION_WORKER_ENABLED;
+    if (raw === undefined || raw === null || raw.trim() === '') {
+      return true;
+    }
+    const normalized = raw.trim().toLowerCase();
+    return normalized !== 'false' && normalized !== '0';
   }
 
   async onApplicationShutdown(signal?: string): Promise<void> {
@@ -87,7 +107,7 @@ export class DeletionWorkerService
    * Ensures uninterrupted subsequent polling and prevents duplicate timers.
    */
   trigger(): void {
-    if (this.isShuttingDown) return;
+    if (!this.isWorkerEnabled() || this.isShuttingDown) return;
 
     if (this.isProcessing) {
       // Flag pending trigger so next cycle starts immediately upon completion
@@ -104,7 +124,7 @@ export class DeletionWorkerService
    * Always guarantees that the next polling cycle is scheduled.
    */
   private scheduleNextPoll(delayMs = this.pollIntervalMs): void {
-    if (this.isShuttingDown) return;
+    if (!this.isWorkerEnabled() || this.isShuttingDown) return;
 
     if (this.pollTimer) {
       clearTimeout(this.pollTimer);
@@ -134,7 +154,7 @@ export class DeletionWorkerService
    * Tracks active cycle promise to support graceful shutdown.
    */
   async runProcessingCycle(): Promise<void> {
-    if (this.isProcessing || this.isShuttingDown) {
+    if (!this.isWorkerEnabled() || this.isProcessing || this.isShuttingDown) {
       return;
     }
 
@@ -162,6 +182,10 @@ export class DeletionWorkerService
    * Returns true if a job was claimed and handled, false if queue is empty.
    */
   async processNextJob(overrideWorkerId?: string): Promise<boolean> {
+    if (!this.isWorkerEnabled() || this.isShuttingDown) {
+      return false;
+    }
+
     const workerId = overrideWorkerId || this.workerId;
     const job = await this.claimNextJob(workerId);
 

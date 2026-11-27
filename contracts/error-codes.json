@@ -1,5 +1,5 @@
 {
-  "contractVersion": "1.0.0",
+  "contractVersion": "1.1.0",
   "codes": [
     {
       "code": "ERR_INTERNAL_SERVER_ERROR",
@@ -159,6 +159,48 @@
       "retry": "new_capture",
       "messageKey": "intent_unknown",
       "fallbackMessage": "I did not understand your request. Please say it another way."
+    },
+    {
+      "code": "ERR_CONSENT_REQUIRED",
+      "http": 403,
+      "owner": [
+        "backend"
+      ],
+      "retry": "none",
+      "messageKey": "consent_required",
+      "fallbackMessage": "Cloud AI consent is required to use voice commands."
+    },
+    {
+      "code": "ERR_UNSUPPORTED_AUDIO_FORMAT",
+      "http": 422,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "audio_unsupported",
+      "fallbackMessage": "This audio format is not supported. Record again."
+    },
+    {
+      "code": "ERR_AUDIO_TOO_LARGE",
+      "http": 413,
+      "owner": [
+        "backend",
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "audio_too_large",
+      "fallbackMessage": "The recording is too large. Record a shorter command."
+    },
+    {
+      "code": "ERR_NO_SPEECH_DETECTED",
+      "http": 422,
+      "owner": [
+        "ai"
+      ],
+      "retry": "new_capture",
+      "messageKey": "speech_not_detected",
+      "fallbackMessage": "I could not hear any clear speech. Please try again."
     },
     {
       "code": "ERR_LOW_CONFIDENCE",

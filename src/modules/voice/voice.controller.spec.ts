@@ -39,4 +39,16 @@ describe('VoiceController', () => {
     );
     expect(response).toEqual(mockResult);
   });
+
+  it('should have JwtAuthGuard and TokenBucketRateLimitGuard applied at the controller class level', () => {
+    // Verify the decorator metadata is attached — NestJS stores guard metadata
+    // on the class itself via Reflect.
+    const guardMetadata: any[] =
+      Reflect.getMetadata('__guards__', VoiceController) ?? [];
+    const guardNames = guardMetadata.map((g: any) =>
+      typeof g === 'function' ? g.name : g?.constructor?.name,
+    );
+    expect(guardNames).toContain('JwtAuthGuard');
+    expect(guardNames).toContain('TokenBucketRateLimitGuard');
+  });
 });

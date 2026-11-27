@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 422,
+  "errorCode": "ERR_NO_SPEECH_DETECTED",
+  "message": "لم أسمع أي كلام واضح، يرجى المحاولة مرة أخرى بصوت أوضح",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

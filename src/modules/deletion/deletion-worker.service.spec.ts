@@ -534,4 +534,73 @@ describe('DeletionWorkerService', () => {
       await shutdownPromise;
     });
   });
+
+  describe('DELETION_WORKER_ENABLED Configuration Control', () => {
+    it('defaults to enabled when DELETION_WORKER_ENABLED is unset or empty', () => {
+      delete process.env.DELETION_WORKER_ENABLED;
+      expect(worker.isWorkerEnabled()).toBe(true);
+
+      process.env.DELETION_WORKER_ENABLED = '';
+      expect(worker.isWorkerEnabled()).toBe(true);
+
+      process.env.DELETION_WORKER_ENABLED = '   ';
+      expect(worker.isWorkerEnabled()).toBe(true);
+    });
+
+    it('remains enabled when explicitly set to "true" (case-insensitive)', () => {
+      process.env.DELETION_WORKER_ENABLED = 'true';
+      expect(worker.isWorkerEnabled()).toBe(true);
+
+      process.env.DELETION_WORKER_ENABLED = 'TRUE';
+      expect(worker.isWorkerEnabled()).toBe(true);
+    });
+
+    it('correctly disables the worker when set to "false" or "0"', () => {
+      process.env.DELETION_WORKER_ENABLED = 'false';
+      expect(worker.isWorkerEnabled()).toBe(false);
+
+      process.env.DELETION_WORKER_ENABLED = 'FALSE';
+      expect(worker.isWorkerEnabled()).toBe(false);
+
+      process.env.DELETION_WORKER_ENABLED = '0';
+      expect(worker.isWorkerEnabled()).toBe(false);
+    });
+
+    it('worker enabled: onModuleInit schedules startup polling timer', () => {
+      process.env.DELETION_WORKER_ENABLED = 'true';
+      worker.onModuleInit();
+      expect(worker['pollTimer']).not.toBeNull();
+    });
+
+    it('worker disabled: onModuleInit does NOT start polling', () => {
+      process.env.DELETION_WORKER_ENABLED = 'false';
+      worker.onModuleInit();
+      expect(worker['pollTimer']).toBeNull();
+    });
+
+    it('worker disabled: trigger does NOT start polling or set timers', () => {
+      process.env.DELETION_WORKER_ENABLED = 'false';
+      worker.trigger();
+      expect(worker['pollTimer']).toBeNull();
+    });
+
+    it('worker disabled: processNextJob returns false without querying or claiming jobs', async () => {
+      process.env.DELETION_WORKER_ENABLED = 'false';
+      const claimSpy = vi.spyOn(worker, 'claimNextJob');
+
+      const result = await worker.processNextJob();
+      expect(result).toBe(false);
+      expect(claimSpy).not.toHaveBeenCalled();
+      expect(mockDataSource.query).not.toHaveBeenCalled();
+    });
+
+    it('worker disabled: runProcessingCycle does NOT execute any jobs', async () => {
+      process.env.DELETION_WORKER_ENABLED = 'false';
+      const processJobSpy = vi.spyOn(worker, 'processNextJob');
+
+      await worker.runProcessingCycle();
+      expect(processJobSpy).not.toHaveBeenCalled();
+      expect(mockDataSource.query).not.toHaveBeenCalled();
+    });
+  });
 });

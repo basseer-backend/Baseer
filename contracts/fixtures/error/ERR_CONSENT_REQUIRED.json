@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 403,
+  "errorCode": "ERR_CONSENT_REQUIRED",
+  "message": "يلزم الموافقة على استخدام خدمات الذكاء الاصطناعي السحابية لاستخدام الأوامر الصوتية",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

@@ -103,5 +103,49 @@ describe('JwtAuthGuard', () => {
       expect(request.user.userId).toBe(userId);
       expect(request.user.isGuest).toBe(false);
     });
+
+    it('should accept a valid Guest Access Token (isGuest: true) — guests are allowed on feature APIs', () => {
+      const guestUserId = 'gggggggg-gggg-gggg-gggg-gggggggggggg';
+      const guestToken = signJwt(
+        { sub: guestUserId, isGuest: true, type: 'access' },
+        testSecret,
+      );
+      const { context, request } = createMockContext(`Bearer ${guestToken}`);
+
+      const result = guard.canActivate(context);
+
+      expect(result).toBe(true);
+      expect(request.user.userId).toBe(guestUserId);
+      expect(request.user.isGuest).toBe(true);
+    });
+
+    it('should accept a valid Registered Access Token (isGuest: false)', () => {
+      const regUserId = 'rrrrrrrr-rrrr-rrrr-rrrr-rrrrrrrrrrrr';
+      const regToken = signJwt(
+        { sub: regUserId, isGuest: false, type: 'access' },
+        testSecret,
+      );
+      const { context, request } = createMockContext(`Bearer ${regToken}`);
+
+      const result = guard.canActivate(context);
+
+      expect(result).toBe(true);
+      expect(request.user.userId).toBe(regUserId);
+      expect(request.user.isGuest).toBe(false);
+    });
+  });
+
+  describe('Refresh Token Rejection', () => {
+    it('should throw UNAUTHORIZED when a Refresh Token is used as Bearer access token', () => {
+      // A refresh token signed with the same secret still has type: "refresh"
+      const refreshToken = signJwt({ sub: 'user-rf', type: 'refresh', familyId: 'fam-1' }, testSecret);
+      const { context } = createMockContext(`Bearer ${refreshToken}`);
+      expect(() => guard.canActivate(context)).toThrow(AppException);
+      try {
+        guard.canActivate(context);
+      } catch (err: any) {
+        expect(err.errorCode).toBe(AppErrorCode.UNAUTHORIZED);
+      }
+    });
   });
 });

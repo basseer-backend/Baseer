@@ -1,0 +1,7 @@
+{
+  "success": false,
+  "statusCode": 422,
+  "errorCode": "ERR_UNSUPPORTED_AUDIO_FORMAT",
+  "message": "صيغة الملف الصوتي غير مدعومة، يرجى تسجيل الأمر مرة أخرى",
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

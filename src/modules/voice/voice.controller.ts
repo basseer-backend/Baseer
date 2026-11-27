@@ -5,8 +5,9 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiHeader } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiHeader, ApiBearerAuth } from '@nestjs/swagger';
 import { VoiceAssistantService } from './voice-assistant.service';
 import { VoiceCommandDto } from './dto/voice-command.dto';
 import { VoiceCommandResultDto } from './dto/voice-command-result.dto';
@@ -15,14 +16,25 @@ import {
   ApiErrorExamples,
 } from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { TokenBucketRateLimitGuard } from '../../common/guards/token-bucket-rate-limit.guard';
+import { RateLimit } from '../../common/decorators/rate-limit.decorator';
 
 @ApiTags('Voice Assistant')
+@ApiBearerAuth('JWT')
+@UseGuards(JwtAuthGuard, TokenBucketRateLimitGuard)
 @Controller('voice')
 export class VoiceController {
   constructor(private readonly voiceAssistantService: VoiceAssistantService) {}
 
   @Post('command')
   @HttpCode(HttpStatus.OK)
+  @RateLimit({
+    capacity: 10,
+    refillRate: 1,
+    cost: 1,
+    keyPrefix: 'voice_command',
+  })
   @ApiOperation({
     summary: 'Process voice command transcript and return classified intent',
     description:
@@ -35,6 +47,8 @@ export class VoiceController {
   })
   @ApiOkEnvelope(VoiceCommandResultDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
+    AppErrorCode.TOO_MANY_REQUESTS,
     AppErrorCode.INTENT_NOT_RECOGNIZED,
     AppErrorCode.LOW_CONFIDENCE,
     AppErrorCode.REQUEST_TIMEOUT,

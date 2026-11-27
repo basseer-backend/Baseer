@@ -1,5 +1,5 @@
 {
-  "contractVersion": "1.0.0",
+  "contractVersion": "1.1.0",
   "locale": "ar",
   "messages": {
     "ERR_INTERNAL_SERVER_ERROR": "حدث خطأ غير متوقع في الخادم",
@@ -17,6 +17,10 @@
     "ERR_NO_TEXT_DETECTED": "لم يتم العثور على أي نص في الصورة الملتقطة",
     "ERR_UNSUPPORTED_IMAGE_FORMAT": "صيغة الصورة غير مدعومة، يرجى إرسال صورة JPEG أو PNG",
     "ERR_INTENT_NOT_RECOGNIZED": "عذراً، لم أفهم طلبك، يرجى المحاولة بصيغة أخرى",
+    "ERR_CONSENT_REQUIRED": "يلزم الموافقة على استخدام خدمات الذكاء الاصطناعي السحابية لاستخدام الأوامر الصوتية",
+    "ERR_UNSUPPORTED_AUDIO_FORMAT": "صيغة الملف الصوتي غير مدعومة، يرجى تسجيل الأمر مرة أخرى",
+    "ERR_AUDIO_TOO_LARGE": "حجم التسجيل الصوتي كبير جداً، يرجى تسجيل أمر أقصر",
+    "ERR_NO_SPEECH_DETECTED": "لم أسمع أي كلام واضح، يرجى المحاولة مرة أخرى بصوت أوضح",
     "ERR_LOW_CONFIDENCE": "لم أتمكن من التأكد من النتيجة، يرجى المحاولة مرة أخرى بشكل أوضح",
     "ERR_QR_NOT_FOUND": "لم يتم العثور على أي كود QR في الإطار",
     "ERR_INVALID_QR_CODE": "كود الـ QR غير صالح أو تالف",

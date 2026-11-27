@@ -1,0 +1,10 @@
+{
+  "success": true,
+  "statusCode": 200,
+  "data": {
+    "transcript": "عايز أروح مكتب العميد",
+    "language": "ar-EG",
+    "confidence": 0.94
+  },
+  "timestamp": "2026-11-13T10:30:00.000Z"
+}

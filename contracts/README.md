@@ -6,13 +6,13 @@
 
 ## محتويات المجلد
 
-- **`contract-version.txt`**: رقم الإصدار الحالي للعقود (`1.0.0`).
+- **`contract-version.txt`**: رقم الإصدار الحالي للعقود (`1.1.0`).
 - **`enums.json`**: التعدادات المشتركة المعتمدة عبر النظام (`VoiceIntent`, `MobileAction`, `FacialExpression`, `HapticPattern`).
-- **`error-codes.json`**: قائمة الـ 20 كود خطأ القياسية مع تفاصيل الـ HTTP status، والجهة المسؤولة (`owner`)، واستراتيجية إعادة المحاولة (`retry`)، ومفاتيح الرسائل والرسائل البديلة.
+- **`error-codes.json`**: قائمة الـ 24 كود خطأ القياسية مع تفاصيل الـ HTTP status، والجهة المسؤولة (`owner`)، واستراتيجية إعادة المحاولة (`retry`)، ومفاتيح الرسائل والرسائل البديلة.
 - **`messages.ar.json`**: نصوص الرسائل الرسمية باللغة العربية المعتمدة للمستخدم لكل كود خطأ. *(إضافة خاصة بالباك إند)*
-- **`fixtures/error/`**: ملفات JSON تمثل الاستجابة الفعلية للخادم (Envelope كامل) عند حدوث كل خطأ من الـ 20 كود خطأ.
+- **`fixtures/error/`**: ملفات JSON تمثل الاستجابة الفعلية للخادم (Envelope كامل) عند حدوث كل خطأ من الـ 24 كود خطأ.
 - **`fixtures/success/`**: ملفات JSON تمثل الاستجابة الفعلية الناجحة (Envelope كامل) لكل خدمة:
-  - خدمات الرؤية و OCR والصوت: `color_detection.json`, `currency_recognition.json`, `face_expression.json`, `obstacle_detection.json`, `ocr.json`, `scene_description.json`, `traffic_sign_recognition.json`, `voice_command.json`.
+  - خدمات الرؤية و OCR والصوت: `color_detection.json`, `currency_recognition.json`, `face_expression.json`, `obstacle_detection.json`, `ocr.json`, `scene_description.json`, `traffic_sign_recognition.json`, `voice_command.json`, `voice_transcribe.json`.
   - خدمات الملاحة الداخلية: `navigation_destinations.json`, `navigation_route.json`. *(إضافة خاصة بالباك إند)*
 - **`CHANGELOG.md`**: سجل التغييرات والإصدارات للعقود.
 

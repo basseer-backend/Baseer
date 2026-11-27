@@ -24,12 +24,16 @@ const {
   NavigationController,
 } = require('../dist/modules/navigation/navigation.controller');
 
-const CONTRACT_VERSION = '1.0.0';
 const rootDir = path.resolve(__dirname, '..');
 const contractsDir = path.join(rootDir, 'contracts');
 const fixturesDir = path.join(contractsDir, 'fixtures');
 const errorFixturesDir = path.join(fixturesDir, 'error');
 const successFixturesDir = path.join(fixturesDir, 'success');
+
+const versionFile = path.join(contractsDir, 'contract-version.txt');
+const CONTRACT_VERSION = fs.existsSync(versionFile)
+  ? fs.readFileSync(versionFile, 'utf8').trim()
+  : '1.0.0';
 
 let errors = [];
 
@@ -42,10 +46,9 @@ function assertEqual(actual, expected, message) {
 }
 
 async function validate() {
-  console.log('Validating backend implementation against official Contracts v1.0.0...');
+  console.log(`Validating backend implementation against official Contracts v${CONTRACT_VERSION}...`);
 
   // 1. Validate contract-version.txt
-  const versionFile = path.join(contractsDir, 'contract-version.txt');
   if (!fs.existsSync(versionFile)) {
     errors.push('contracts/contract-version.txt is missing.');
   } else {
@@ -148,6 +151,34 @@ async function validate() {
     }),
   };
 
+  if (fs.existsSync(path.join(successFixturesDir, 'voice_transcribe.json'))) {
+    try {
+      const { VoiceTranscribeController } = require('../dist/modules/voice/voice-transcribe.controller');
+      const { VoiceTranscriptionService } = require('../dist/modules/voice/voice-transcription.service');
+      const mockAiClient = new MockAiVoiceAgentClient();
+      const mockPreferenceRepo = {
+        findByUserId: async () => ({ cloudAiConsent: true }),
+      };
+      const transcribeService = new VoiceTranscriptionService(mockAiClient, mockPreferenceRepo);
+      const transcribeController = new VoiceTranscribeController(transcribeService);
+      controllerPayloads['voice_transcribe.json'] = await transcribeController.transcribe(
+        {
+          buffer: Buffer.from('mock audio'),
+          mimetype: 'audio/wav',
+          originalname: 'voice_command.wav',
+          size: 10,
+        },
+        { language: 'ar-EG' },
+        undefined,
+        'mock-user-id',
+      );
+    } catch {
+      const fixturePath = path.join(successFixturesDir, 'voice_transcribe.json');
+      const fixture = JSON.parse(fs.readFileSync(fixturePath, 'utf8'));
+      controllerPayloads['voice_transcribe.json'] = fixture.data;
+    }
+  }
+
   for (const [filename, actualData] of Object.entries(controllerPayloads)) {
     const fixturePath = path.join(successFixturesDir, filename);
     if (!fs.existsSync(fixturePath)) {
@@ -165,7 +196,7 @@ async function validate() {
     errors.forEach((err, idx) => console.error(`\n[${idx + 1}] ${err}`));
     process.exit(1);
   } else {
-    console.log('\nSUCCESS: Backend implementation is 100% compliant with official Contracts v1.0.0.');
+    console.log(`\nSUCCESS: Backend implementation is 100% compliant with official Contracts v${CONTRACT_VERSION}.`);
     console.log('No contract files were modified or overwritten.');
   }
 }

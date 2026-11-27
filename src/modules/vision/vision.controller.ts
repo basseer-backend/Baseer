@@ -1,5 +1,5 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ImageInputDto } from '../../common/dto/image-input.dto';
 import { SceneDescriptionDto } from './dto/scene-description.dto';
 import { CurrencyResultDto } from './dto/currency-result.dto';
@@ -14,8 +14,11 @@ import {
 } from '../../common/decorators/swagger.decorator';
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { validateImageInput } from '../../common/helpers/image-validation.helper';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('Computer Vision')
+@ApiBearerAuth('JWT')
+@UseGuards(JwtAuthGuard)
 @Controller('vision')
 export class VisionController {
   @Post('describe')
@@ -27,6 +30,7 @@ export class VisionController {
   })
   @ApiOkEnvelope(SceneDescriptionDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
@@ -54,6 +58,7 @@ export class VisionController {
   })
   @ApiOkEnvelope(CurrencyResultDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
@@ -82,6 +87,7 @@ export class VisionController {
   })
   @ApiOkEnvelope(ColorResultDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
@@ -110,6 +116,7 @@ export class VisionController {
   })
   @ApiOkEnvelope(TrafficSignResultDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
@@ -136,6 +143,7 @@ export class VisionController {
   })
   @ApiOkEnvelope(FaceExpressionResultDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,
@@ -162,6 +170,7 @@ export class VisionController {
   })
   @ApiOkEnvelope(ObstacleResultDto)
   @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
     AppErrorCode.IMAGE_BLURRY,
     AppErrorCode.IMAGE_TOO_DARK,
     AppErrorCode.UNSUPPORTED_IMAGE_FORMAT,

@@ -2197,6 +2197,28 @@
               }
             }
           },
+          "429": {
+            "description": "Error responses for HTTP 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_TOO_MANY_REQUESTS": {
+                    "summary": "ERR_TOO_MANY_REQUESTS",
+                    "value": {
+                      "success": false,
+                      "statusCode": 429,
+                      "errorCode": "ERR_TOO_MANY_REQUESTS",
+                      "message": "طلبات كثيرة جداً، يرجى الانتظار قليلاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "500": {
             "description": "Error responses for HTTP 500",
             "content": {
@@ -2458,6 +2480,28 @@
                       "statusCode": 422,
                       "errorCode": "ERR_NO_SPEECH_DETECTED",
                       "message": "لم أسمع أي كلام واضح، يرجى المحاولة مرة أخرى بصوت أوضح",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Error responses for HTTP 429",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_TOO_MANY_REQUESTS": {
+                    "summary": "ERR_TOO_MANY_REQUESTS",
+                    "value": {
+                      "success": false,
+                      "statusCode": 429,
+                      "errorCode": "ERR_TOO_MANY_REQUESTS",
+                      "message": "طلبات كثيرة جداً، يرجى الانتظار قليلاً",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
                   }
@@ -4645,7 +4689,7 @@
           "imageBase64": {
             "type": "string",
             "example": "data:image/jpeg;base64,/9j/4AAQSkZJRg...",
-            "description": "Base64 encoded image string (JPEG/PNG). Testing fake triggers: send \"blurry\" for ERR_IMAGE_BLURRY, \"dark\" for ERR_IMAGE_TOO_DARK, \"notext\" for ERR_NO_TEXT_DETECTED (OCR only), \"unsupported\" for ERR_UNSUPPORTED_IMAGE_FORMAT, \"toolarge\" for ERR_FILE_TOO_LARGE, \"lowconfidence\" for ERR_LOW_CONFIDENCE, or \"timeout\" for ERR_REQUEST_TIMEOUT."
+            "description": "Base64 encoded image string (JPEG, PNG, WebP, AVIF up to 7 MiB / 50 MP). Image payloads are normalized to canonical sRGB JPEG with EXIF/metadata stripped and alpha channels flattened onto white. Testing fake triggers: send \"blurry\" for ERR_IMAGE_BLURRY, \"dark\" for ERR_IMAGE_TOO_DARK, \"notext\" for ERR_NO_TEXT_DETECTED (OCR only), \"unsupported\" for ERR_UNSUPPORTED_IMAGE_FORMAT, \"toolarge\" for ERR_FILE_TOO_LARGE, \"lowconfidence\" for ERR_LOW_CONFIDENCE, or \"timeout\" for ERR_REQUEST_TIMEOUT."
           }
         },
         "required": [
@@ -4745,6 +4789,32 @@
         },
         "required": [
           "userSpeech"
+        ]
+      },
+      "VoiceTranscribeResultDto": {
+        "type": "object",
+        "properties": {
+          "transcript": {
+            "type": "string",
+            "example": "عايز أروح مكتب العميد",
+            "description": "Transcribed Arabic or English text from the audio input"
+          },
+          "language": {
+            "type": "string",
+            "example": "ar-EG",
+            "description": "Detected or requested speech language locale"
+          },
+          "confidence": {
+            "type": "object",
+            "example": 0.96,
+            "nullable": true,
+            "description": "Transcription confidence score between 0 and 1, or null if unavailable"
+          }
+        },
+        "required": [
+          "transcript",
+          "language",
+          "confidence"
         ]
       },
       "SceneDescriptionDto": {
@@ -4974,32 +5044,6 @@
           "hazardDetected",
           "hapticAlertPattern",
           "spokenWarning",
-          "confidence"
-        ]
-      },
-      "VoiceTranscribeResultDto": {
-        "type": "object",
-        "properties": {
-          "transcript": {
-            "type": "string",
-            "example": "عايز أروح مكتب العميد",
-            "description": "Transcribed Arabic or English text from the audio input"
-          },
-          "language": {
-            "type": "string",
-            "example": "ar-EG",
-            "description": "Detected or requested speech language locale"
-          },
-          "confidence": {
-            "type": "object",
-            "example": 0.96,
-            "nullable": true,
-            "description": "Transcription confidence score between 0 and 1, or null if unavailable"
-          }
-        },
-        "required": [
-          "transcript",
-          "language",
           "confidence"
         ]
       }

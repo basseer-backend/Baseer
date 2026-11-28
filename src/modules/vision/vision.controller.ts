@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UsePipes } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ImageInputDto } from '../../common/dto/image-input.dto';
 import { SceneDescriptionDto } from './dto/scene-description.dto';
@@ -15,10 +15,12 @@ import {
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { validateImageInput } from '../../common/helpers/image-validation.helper';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { ImageSanitizerPipe } from '../../common/pipes/image-sanitizer.pipe';
 
 @ApiTags('Computer Vision')
 @ApiBearerAuth('JWT')
 @UseGuards(JwtAuthGuard)
+@UsePipes(ImageSanitizerPipe)
 @Controller('vision')
 export class VisionController {
   @Post('describe')

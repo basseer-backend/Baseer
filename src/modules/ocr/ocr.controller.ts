@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, UsePipes } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ImageInputDto } from '../../common/dto/image-input.dto';
 import { OcrResultDto } from './dto/ocr-result.dto';
@@ -9,6 +9,7 @@ import {
 import { AppErrorCode } from '../../common/constants/error-codes';
 import { validateImageInput } from '../../common/helpers/image-validation.helper';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { ImageSanitizerPipe } from '../../common/pipes/image-sanitizer.pipe';
 
 @ApiTags('OCR & Documents')
 @ApiBearerAuth('JWT')
@@ -34,6 +35,7 @@ export class OcrController {
     AppErrorCode.VALIDATION_FAILED,
     AppErrorCode.FILE_TOO_LARGE,
   )
+  @UsePipes(new ImageSanitizerPipe({ allowNoTextTrigger: true }))
   readDocument(@Body() body: ImageInputDto): OcrResultDto {
     validateImageInput(body.imageBase64, { allowNoTextTrigger: true });
 

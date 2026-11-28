@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { TaskStatus } from '../enums/task-status.enum';
 import { TaskExecution } from '../../../database/entities/task-execution.entity';
+import { RedisTaskState } from '../interfaces/redis-task-state.interface';
 
 export class TaskResponseDto {
   @ApiProperty({
@@ -51,6 +52,16 @@ export class TaskResponseDto {
   errorCode: string | null;
 
   @ApiProperty({
+    description:
+      'Temporary task execution result when completed (available only in Redis within 2-hour TTL; never stored in persistent DB)',
+    example: null,
+    required: false,
+    nullable: true,
+    type: Object,
+  })
+  result?: Record<string, any> | null;
+
+  @ApiProperty({
     description: 'Timestamp when the task execution was created',
     example: '2026-11-22T12:00:00.000Z',
   })
@@ -74,8 +85,24 @@ export class TaskResponseDto {
     dto.status = entity.status as TaskStatus;
     dto.processingTimeMs = entity.processingTimeMs;
     dto.errorCode = entity.errorCode;
+    dto.result = null;
     dto.createdAt = entity.createdAt;
     dto.completedAt = entity.completedAt;
+    return dto;
+  }
+
+  static fromRedisState(state: RedisTaskState): TaskResponseDto {
+    const dto = new TaskResponseDto();
+    dto.id = state.id;
+    dto.clientTaskId = state.clientTaskId;
+    dto.requestId = state.requestId;
+    dto.taskType = state.taskType;
+    dto.status = state.status;
+    dto.processingTimeMs = state.processingTimeMs;
+    dto.errorCode = state.errorCode;
+    dto.result = state.result ?? null;
+    dto.createdAt = new Date(state.createdAt);
+    dto.completedAt = state.completedAt ? new Date(state.completedAt) : null;
     return dto;
   }
 }

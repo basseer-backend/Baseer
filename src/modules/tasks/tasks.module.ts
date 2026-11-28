@@ -6,11 +6,26 @@ import { TaskExecutionRepository } from '../../database/repositories/task-execut
 import { TaskModelRunRepository } from '../../database/repositories/task-model-run.repository';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
+import { RedisTaskStoreService } from './services/redis-task-store.service';
+import { RedisModule } from '../../common/redis/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TaskExecution, TaskModelRun])],
+  imports: [
+    TypeOrmModule.forFeature([TaskExecution, TaskModelRun]),
+    RedisModule,
+  ],
   controllers: [TasksController],
-  providers: [TasksService, TaskExecutionRepository, TaskModelRunRepository],
-  exports: [TasksService, TaskExecutionRepository, TaskModelRunRepository],
+  providers: [
+    TasksService,
+    TaskExecutionRepository,
+    TaskModelRunRepository,
+    RedisTaskStoreService,
+  ],
+  exports: [
+    TasksService,
+    TaskExecutionRepository,
+    TaskModelRunRepository,
+    RedisTaskStoreService,
+  ],
 })
 export class TasksModule {}

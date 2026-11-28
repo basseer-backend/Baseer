@@ -1052,7 +1052,7 @@
     },
     "/api/v1/tasks/{id}": {
       "get": {
-        "description": "Retrieves the status, execution metadata, and timings for a task belonging to the authenticated user.",
+        "description": "Retrieves the status, temporary results, execution metadata, and timings for a task belonging to the authenticated user from Redis (2-hour TTL). Never falls back to persistent storage.",
         "operationId": "TasksController_findOne",
         "parameters": [
           {
@@ -1151,6 +1151,28 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "Error responses for HTTP 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_SERVICE_UNAVAILABLE": {
+                    "summary": "ERR_SERVICE_UNAVAILABLE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 503,
+                      "errorCode": "ERR_SERVICE_UNAVAILABLE",
+                      "message": "الخدمة غير متوفرة حالياً، حاول لاحقاً",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1166,7 +1188,7 @@
     },
     "/api/v1/tasks/{id}/cancel": {
       "post": {
-        "description": "Cancels an active task execution. Safe to repeat if already cancelled. Returns 400 Bad Request if task is completed or failed.",
+        "description": "Atomically cancels an active task execution in Redis. Safe to repeat if already cancelled. Returns 400 Bad Request if task is completed or failed. Note: cancellation sets the authoritative task state to CANCELLED and prevents future result commits; because the current OCR implementation is synchronous mock-based without a background worker queue, no underlying OS process termination is performed.",
         "operationId": "TasksController_cancel",
         "parameters": [
           {
@@ -1281,6 +1303,28 @@
                       "statusCode": 500,
                       "errorCode": "ERR_INTERNAL_SERVER_ERROR",
                       "message": "حدث خطأ غير متوقع في الخادم",
+                      "timestamp": "2026-11-06T14:30:00.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Error responses for HTTP 503",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                },
+                "examples": {
+                  "ERR_SERVICE_UNAVAILABLE": {
+                    "summary": "ERR_SERVICE_UNAVAILABLE",
+                    "value": {
+                      "success": false,
+                      "statusCode": 503,
+                      "errorCode": "ERR_SERVICE_UNAVAILABLE",
+                      "message": "الخدمة غير متوفرة حالياً، حاول لاحقاً",
                       "timestamp": "2026-11-06T14:30:00.000Z"
                     }
                   }
@@ -4334,6 +4378,12 @@
             "format": "date-time",
             "type": "string",
             "description": "Timestamp when the task execution completed, failed, or was cancelled",
+            "example": null,
+            "nullable": true
+          },
+          "result": {
+            "type": "object",
+            "description": "Temporary task execution result when completed (available only in Redis within 2-hour TTL; never stored in persistent DB)",
             "example": null,
             "nullable": true
           }

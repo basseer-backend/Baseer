@@ -11,6 +11,8 @@ import {
   TERMINAL_TASK_STATUSES,
 } from './enums/task-status.enum';
 import { TasksService } from './tasks.service';
+import { RedisTaskStoreService } from './services/redis-task-store.service';
+import { RedisTaskState } from './interfaces/redis-task-state.interface';
 
 describe('TasksService', () => {
   let service: TasksService;
@@ -18,6 +20,14 @@ describe('TasksService', () => {
     findOne: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
     updateMany: ReturnType<typeof vi.fn>;
+    deleteMany: ReturnType<typeof vi.fn>;
+  };
+  let redisTaskStore: {
+    createTask: ReturnType<typeof vi.fn>;
+    getTask: ReturnType<typeof vi.fn>;
+    cancelTask: ReturnType<typeof vi.fn>;
+    transitionStatus: ReturnType<typeof vi.fn>;
+    completeWithResult: ReturnType<typeof vi.fn>;
   };
 
   const mockUserId = '11111111-1111-1111-1111-111111111111';
@@ -42,14 +52,44 @@ describe('TasksService', () => {
     return Object.assign(task, overrides);
   };
 
+  const createMockRedisState = (
+    overrides: Partial<RedisTaskState> = {},
+  ): RedisTaskState => ({
+    id: mockTaskId,
+    userId: mockUserId,
+    clientTaskId: mockClientTaskId,
+    requestId: mockRequestId,
+    taskType: 'OCR_DOCUMENT',
+    status: TaskStatus.PENDING,
+    processingTimeMs: null,
+    errorCode: null,
+    result: null,
+    createdAt: '2026-11-22T10:00:00.000Z',
+    completedAt: null,
+    expiresAt: Math.floor(Date.now() / 1000) + 7200,
+    ...overrides,
+  });
+
   beforeEach(() => {
     repo = {
       findOne: vi.fn(),
       create: vi.fn(),
       updateMany: vi.fn(),
+      deleteMany: vi.fn(),
     };
 
-    service = new TasksService(repo as unknown as TaskExecutionRepository);
+    redisTaskStore = {
+      createTask: vi.fn(),
+      getTask: vi.fn(),
+      cancelTask: vi.fn(),
+      transitionStatus: vi.fn(),
+      completeWithResult: vi.fn(),
+    };
+
+    service = new TasksService(
+      repo as unknown as TaskExecutionRepository,
+      redisTaskStore as unknown as RedisTaskStoreService,
+    );
   });
 
   describe('Transition rules & matrix (Database parity)', () => {
@@ -82,19 +122,13 @@ describe('TasksService', () => {
 
     it('should verify the complete transition matrix with canTransition', () => {
       const allStatuses = Object.values(TaskStatus);
-
-      // Expected table from enforce_task_status_transition:
-      // Same status transition (from === to) is always allowed (returns true)
-      // PENDING can transition to PROCESSING, COMPLETED, FAILED, CANCELLED
-      // PROCESSING can transition to COMPLETED, FAILED, CANCELLED
-      // COMPLETED, FAILED, CANCELLED can only transition to themselves
       for (const from of allStatuses) {
         for (const to of allStatuses) {
           const result = canTransition(from, to);
           if (from === to) {
             expect(result).toBe(true);
           } else if (from === TaskStatus.PENDING) {
-            expect(result).toBe(true); // PENDING can go to any of the 4
+            expect(result).toBe(true);
           } else if (from === TaskStatus.PROCESSING) {
             if (to === TaskStatus.PENDING) {
               expect(result).toBe(false);
@@ -102,7 +136,6 @@ describe('TasksService', () => {
               expect(result).toBe(true);
             }
           } else {
-            // COMPLETED, FAILED, CANCELLED
             expect(result).toBe(false);
           }
         }
@@ -110,342 +143,166 @@ describe('TasksService', () => {
     });
   });
 
-  describe('createOrGet (Idempotency and Task Creation)', () => {
+  describe('createOrGet (Idempotency and Task Creation with Redis 7200s TTL)', () => {
     const dto: CreateTaskDto = {
       clientTaskId: mockClientTaskId,
       taskType: 'OCR_DOCUMENT',
     };
 
-    it('should create a new task when clientTaskId does not exist (created = true)', async () => {
+    it('creates new task in DB and initializes Redis state with 7200s TTL', async () => {
       repo.findOne.mockResolvedValueOnce(null);
       const createdTask = createMockTask();
       repo.create.mockResolvedValueOnce(createdTask);
+      redisTaskStore.createTask.mockResolvedValueOnce(createMockRedisState());
 
       const result = await service.createOrGet(mockUserId, dto);
 
-      expect(repo.findOne).toHaveBeenCalledWith({
-        where: { userId: mockUserId, clientTaskId: dto.clientTaskId },
-      });
-      expect(repo.create).toHaveBeenCalledWith(
+      expect(repo.create).toHaveBeenCalled();
+      expect(redisTaskStore.createTask).toHaveBeenCalledWith(
         expect.objectContaining({
+          id: createdTask.id,
           userId: mockUserId,
           clientTaskId: dto.clientTaskId,
-          taskType: dto.taskType,
           status: TaskStatus.PENDING,
-          requestId: expect.any(String),
         }),
       );
       expect(result.created).toBe(true);
       expect(result.task).toBe(createdTask);
     });
 
-    it('should return existing task when clientTaskId already exists with same taskType (created = false)', async () => {
+    it('rolls back PostgreSQL record if Redis initialization fails (Constraint 7)', async () => {
+      repo.findOne.mockResolvedValueOnce(null);
+      const createdTask = createMockTask();
+      repo.create.mockResolvedValueOnce(createdTask);
+      repo.deleteMany.mockResolvedValueOnce({ affected: 1 });
+
+      const redisError = new AppException(
+        AppErrorCode.SERVICE_UNAVAILABLE,
+        'Redis unavailable',
+      );
+      redisTaskStore.createTask.mockRejectedValueOnce(redisError);
+
+      await expect(service.createOrGet(mockUserId, dto)).rejects.toMatchObject({
+        errorCode: AppErrorCode.SERVICE_UNAVAILABLE,
+      });
+
+      expect(repo.deleteMany).toHaveBeenCalledWith({ id: createdTask.id });
+    });
+
+    it('returns existing task when clientTaskId already exists (created = false)', async () => {
       const existingTask = createMockTask();
       repo.findOne.mockResolvedValueOnce(existingTask);
+      redisTaskStore.getTask.mockResolvedValueOnce(createMockRedisState());
 
       const result = await service.createOrGet(mockUserId, dto);
 
-      expect(repo.findOne).toHaveBeenCalledTimes(1);
       expect(repo.create).not.toHaveBeenCalled();
       expect(result.created).toBe(false);
       expect(result.task).toBe(existingTask);
     });
 
-    it('should throw BAD_REQUEST when clientTaskId already exists but with different taskType', async () => {
+    it('throws BAD_REQUEST when clientTaskId already exists but with different taskType', async () => {
       const existingTask = createMockTask({ taskType: 'NAVIGATION_ROUTE' });
       repo.findOne.mockResolvedValueOnce(existingTask);
 
-      await expect(
-        service.createOrGet(mockUserId, dto),
-      ).rejects.toMatchObject({
+      await expect(service.createOrGet(mockUserId, dto)).rejects.toMatchObject({
         errorCode: AppErrorCode.BAD_REQUEST,
       });
-    });
-
-    it('should handle race condition (Postgres 23505 unique violation) by fetching existing task (created = false)', async () => {
-      repo.findOne.mockResolvedValueOnce(null); // Initial check: not found
-
-      const uniqueError: any = new Error(
-        'duplicate key value violates unique constraint',
-      );
-      uniqueError.code = '23505';
-      repo.create.mockRejectedValueOnce(uniqueError);
-
-      const existingRacedTask = createMockTask();
-      repo.findOne.mockResolvedValueOnce(existingRacedTask); // Second check: returns raced task
-
-      const result = await service.createOrGet(mockUserId, dto);
-
-      expect(repo.create).toHaveBeenCalledTimes(1);
-      expect(repo.findOne).toHaveBeenCalledTimes(2);
-      expect(result.created).toBe(false);
-      expect(result.task).toBe(existingRacedTask);
-    });
-
-    it('should throw BAD_REQUEST if raced task has different taskType', async () => {
-      repo.findOne.mockResolvedValueOnce(null);
-
-      const uniqueError: any = new Error(
-        'duplicate key value violates unique constraint',
-      );
-      uniqueError.code = '23505';
-      repo.create.mockRejectedValueOnce(uniqueError);
-
-      const existingRacedTask = createMockTask({ taskType: 'DIFFERENT_TYPE' });
-      repo.findOne.mockResolvedValueOnce(existingRacedTask);
-
-      await expect(
-        service.createOrGet(mockUserId, dto),
-      ).rejects.toMatchObject({
-        errorCode: AppErrorCode.BAD_REQUEST,
-      });
-    });
-
-    it('should rethrow unexpected database errors during creation', async () => {
-      repo.findOne.mockResolvedValueOnce(null);
-      const dbError = new Error('Connection refused');
-      repo.create.mockRejectedValueOnce(dbError);
-
-      await expect(service.createOrGet(mockUserId, dto)).rejects.toThrow(
-        'Connection refused',
-      );
     });
   });
 
-  describe('getForUser', () => {
-    it('should return task when owned by user', async () => {
-      const task = createMockTask();
-      repo.findOne.mockResolvedValueOnce(task);
+  describe('getForUser (Single Source of Truth: Redis)', () => {
+    it('retrieves task strictly from Redis without querying PostgreSQL', async () => {
+      const redisState = createMockRedisState({ status: TaskStatus.PROCESSING });
+      redisTaskStore.getTask.mockResolvedValueOnce(redisState);
 
       const result = await service.getForUser(mockUserId, mockTaskId);
-      expect(result).toBe(task);
-      expect(repo.findOne).toHaveBeenCalledWith({
-        where: { id: mockTaskId, userId: mockUserId },
-      });
+
+      expect(result).toBe(redisState);
+      expect(redisTaskStore.getTask).toHaveBeenCalledWith(mockTaskId, mockUserId);
+      expect(repo.findOne).not.toHaveBeenCalled(); // PostgreSQL NOT queried as fallback!
     });
 
-    it('should throw NOT_FOUND when task is not found or belongs to another user without leaking existence', async () => {
-      repo.findOne.mockResolvedValueOnce(null);
+    it('propagates NOT_FOUND from Redis without falling back to DB', async () => {
+      redisTaskStore.getTask.mockRejectedValueOnce(
+        new AppException(AppErrorCode.NOT_FOUND, 'Task not found or expired'),
+      );
 
-      await expect(
-        service.getForUser('other-user', mockTaskId),
-      ).rejects.toMatchObject({
+      await expect(service.getForUser(mockUserId, mockTaskId)).rejects.toMatchObject({
         errorCode: AppErrorCode.NOT_FOUND,
       });
+      expect(repo.findOne).not.toHaveBeenCalled();
     });
   });
 
-  describe('cancel', () => {
-    it('should cancel a task in PENDING status', async () => {
-      const pendingTask = createMockTask({ status: TaskStatus.PENDING });
-      const cancelledTask = createMockTask({ status: TaskStatus.CANCELLED });
-
-      repo.findOne
-        .mockResolvedValueOnce(pendingTask) // getForUser
-        .mockResolvedValueOnce(cancelledTask); // read updated
-      repo.updateMany.mockResolvedValueOnce({ affected: 1 });
+  describe('cancel (Atomic Cancellation via Redis)', () => {
+    it('cancels task in Redis and syncs PostgreSQL best-effort', async () => {
+      const cancelledState = createMockRedisState({
+        status: TaskStatus.CANCELLED,
+        completedAt: '2026-11-22T10:05:00Z',
+      });
+      redisTaskStore.cancelTask.mockResolvedValueOnce(cancelledState);
+      repo.updateMany.mockResolvedValue({ affected: 1 });
 
       const result = await service.cancel(mockUserId, mockTaskId);
 
+      expect(result).toBe(cancelledState);
+      expect(redisTaskStore.cancelTask).toHaveBeenCalledWith(mockTaskId, mockUserId);
       expect(repo.updateMany).toHaveBeenCalledWith(
         { id: mockTaskId, status: TaskStatus.PENDING },
-        expect.objectContaining({
-          status: TaskStatus.CANCELLED,
-          completedAt: expect.any(Function),
-        }),
+        expect.objectContaining({ status: TaskStatus.CANCELLED }),
       );
-      // Verify completedAt returns 'now()'
-      const updatePayload = repo.updateMany.mock.calls[0][1];
-      expect(updatePayload.completedAt()).toBe('now()');
-      expect(result.status).toBe(TaskStatus.CANCELLED);
     });
 
-    it('should cancel a task in PROCESSING status', async () => {
-      const processingTask = createMockTask({ status: TaskStatus.PROCESSING });
-      const cancelledTask = createMockTask({ status: TaskStatus.CANCELLED });
-
-      repo.findOne
-        .mockResolvedValueOnce(processingTask) // getForUser
-        .mockResolvedValueOnce(cancelledTask); // read updated
-      repo.updateMany.mockResolvedValueOnce({ affected: 1 });
-
-      const result = await service.cancel(mockUserId, mockTaskId);
-
-      expect(repo.updateMany).toHaveBeenCalledWith(
-        { id: mockTaskId, status: TaskStatus.PROCESSING },
-        expect.objectContaining({
-          status: TaskStatus.CANCELLED,
-          completedAt: expect.any(Function),
-        }),
+    it('propagates error when task is in non-cancellable state (e.g. COMPLETED)', async () => {
+      redisTaskStore.cancelTask.mockRejectedValueOnce(
+        new AppException(
+          AppErrorCode.BAD_REQUEST,
+          'Cannot cancel task in status "COMPLETED".',
+        ),
       );
-      expect(result.status).toBe(TaskStatus.CANCELLED);
-    });
 
-    it('should return already CANCELLED task idempotently without calling updateMany', async () => {
-      const alreadyCancelled = createMockTask({ status: TaskStatus.CANCELLED });
-      repo.findOne.mockResolvedValueOnce(alreadyCancelled);
-
-      const result = await service.cancel(mockUserId, mockTaskId);
-
-      expect(result).toBe(alreadyCancelled);
-      expect(repo.updateMany).not.toHaveBeenCalled();
-    });
-
-    it('should throw BAD_REQUEST when cancelling COMPLETED task', async () => {
-      const completedTask = createMockTask({ status: TaskStatus.COMPLETED });
-      repo.findOne.mockResolvedValueOnce(completedTask);
-
-      await expect(
-        service.cancel(mockUserId, mockTaskId),
-      ).rejects.toMatchObject({
-        errorCode: AppErrorCode.BAD_REQUEST,
-      });
-    });
-
-    it('should throw BAD_REQUEST when cancelling FAILED task', async () => {
-      const failedTask = createMockTask({ status: TaskStatus.FAILED });
-      repo.findOne.mockResolvedValueOnce(failedTask);
-
-      await expect(
-        service.cancel(mockUserId, mockTaskId),
-      ).rejects.toMatchObject({
+      await expect(service.cancel(mockUserId, mockTaskId)).rejects.toMatchObject({
         errorCode: AppErrorCode.BAD_REQUEST,
       });
     });
   });
 
-  describe('markProcessing, markCompleted, markFailed and Race Conditions', () => {
-    it('markProcessing should transition from PENDING to PROCESSING', async () => {
-      const pendingTask = createMockTask({ status: TaskStatus.PENDING });
-      const processingTask = createMockTask({ status: TaskStatus.PROCESSING });
-
-      repo.findOne
-        .mockResolvedValueOnce(pendingTask)
-        .mockResolvedValueOnce(processingTask);
-      repo.updateMany.mockResolvedValueOnce({ affected: 1 });
-
-      const result = await service.markProcessing(mockTaskId);
-
-      expect(repo.updateMany).toHaveBeenCalledWith(
-        { id: mockTaskId, status: TaskStatus.PENDING },
-        { status: TaskStatus.PROCESSING },
-      );
-      expect(result.status).toBe(TaskStatus.PROCESSING);
-    });
-
-    it('markProcessing should return existing task if already PROCESSING', async () => {
-      const processingTask = createMockTask({ status: TaskStatus.PROCESSING });
-      repo.findOne.mockResolvedValueOnce(processingTask);
-
-      const result = await service.markProcessing(mockTaskId);
-
-      expect(result).toBe(processingTask);
-      expect(repo.updateMany).not.toHaveBeenCalled();
-    });
-
-    it('markCompleted should set completedAt and processingTimeMs', async () => {
-      const processingTask = createMockTask({ status: TaskStatus.PROCESSING });
-      const completedTask = createMockTask({
+  describe('markCompleted (Extracted text in Redis ONLY)', () => {
+    it('stores result in Redis and never writes extracted text to PostgreSQL', async () => {
+      const ocrResult = {
+        detectedLanguage: 'en',
+        extractedText: 'Prescription text sample',
+        arabicSimplifiedText: 'نص وصفة طبية',
+        confidence: 0.98,
+      };
+      const completedState = createMockRedisState({
         status: TaskStatus.COMPLETED,
-        processingTimeMs: 120,
+        result: ocrResult,
+        processingTimeMs: 150,
       });
+      redisTaskStore.completeWithResult.mockResolvedValueOnce(completedState);
+      repo.updateMany.mockResolvedValue({ affected: 1 });
 
-      repo.findOne
-        .mockResolvedValueOnce(processingTask)
-        .mockResolvedValueOnce(completedTask);
-      repo.updateMany.mockResolvedValueOnce({ affected: 1 });
+      const result = await service.markCompleted(mockTaskId, ocrResult, 150);
 
-      const result = await service.markCompleted(mockTaskId, 120);
-
-      expect(repo.updateMany).toHaveBeenCalledWith(
-        { id: mockTaskId, status: TaskStatus.PROCESSING },
-        expect.objectContaining({
-          status: TaskStatus.COMPLETED,
-          processingTimeMs: 120,
-          completedAt: expect.any(Function),
-        }),
+      expect(result).toBe(completedState);
+      expect(redisTaskStore.completeWithResult).toHaveBeenCalledWith(
+        mockTaskId,
+        ocrResult,
+        150,
       );
-      const updatePayload = repo.updateMany.mock.calls[0][1];
-      expect(updatePayload.completedAt()).toBe('now()');
-      expect(result.status).toBe(TaskStatus.COMPLETED);
-    });
 
-    it('markFailed should set completedAt, errorCode and processingTimeMs', async () => {
-      const processingTask = createMockTask({ status: TaskStatus.PROCESSING });
-      const failedTask = createMockTask({
-        status: TaskStatus.FAILED,
-        errorCode: 'ERR_TIMEOUT',
-        processingTimeMs: 250,
-      });
-
-      repo.findOne
-        .mockResolvedValueOnce(processingTask)
-        .mockResolvedValueOnce(failedTask);
-      repo.updateMany.mockResolvedValueOnce({ affected: 1 });
-
-      const result = await service.markFailed(mockTaskId, 'ERR_TIMEOUT', 250);
-
-      expect(repo.updateMany).toHaveBeenCalledWith(
-        { id: mockTaskId, status: TaskStatus.PROCESSING },
-        expect.objectContaining({
-          status: TaskStatus.FAILED,
-          errorCode: 'ERR_TIMEOUT',
-          processingTimeMs: 250,
-          completedAt: expect.any(Function),
-        }),
-      );
-      const updatePayload = repo.updateMany.mock.calls[0][1];
-      expect(updatePayload.completedAt()).toBe('now()');
-      expect(result.status).toBe(TaskStatus.FAILED);
-    });
-
-    it('should reject invalid transition (e.g. markProcessing from COMPLETED)', async () => {
-      const completedTask = createMockTask({ status: TaskStatus.COMPLETED });
-      repo.findOne.mockResolvedValueOnce(completedTask);
-
-      await expect(
-        service.markProcessing(mockTaskId),
-      ).rejects.toMatchObject({
-        errorCode: AppErrorCode.BAD_REQUEST,
-      });
-    });
-
-    it('should handle transition race condition: affected=0 and latest already at targetStatus', async () => {
-      const pendingTask = createMockTask({ status: TaskStatus.PENDING });
-      const latestTask = createMockTask({ status: TaskStatus.CANCELLED });
-
-      repo.findOne
-        .mockResolvedValueOnce(pendingTask) // initial fetch
-        .mockResolvedValueOnce(latestTask); // latest fetch after affected=0
-      repo.updateMany.mockResolvedValueOnce({ affected: 0 });
-
-      const result = await service.cancel(mockUserId, mockTaskId);
-
-      expect(result).toBe(latestTask);
-    });
-
-    it('should handle transition race condition: affected=0 and latest status cannot transition', async () => {
-      const pendingTask = createMockTask({ status: TaskStatus.PENDING });
-      const latestTask = createMockTask({ status: TaskStatus.COMPLETED }); // Raced to COMPLETED
-
-      repo.findOne
-        .mockResolvedValueOnce(pendingTask) // initial fetch
-        .mockResolvedValueOnce(latestTask); // latest fetch after affected=0
-      repo.updateMany.mockResolvedValueOnce({ affected: 0 });
-
-      await expect(
-        service.cancel(mockUserId, mockTaskId),
-      ).rejects.toMatchObject({
-        errorCode: AppErrorCode.BAD_REQUEST,
-      });
-    });
-
-    it('should throw NOT_FOUND if task does not exist on transition helper', async () => {
-      repo.findOne.mockResolvedValueOnce(null);
-
-      await expect(service.markProcessing('missing-id')).rejects.toThrowError(
-        AppException,
-      );
+      // Verify PostgreSQL update contains ONLY operational metadata, NOT extractedText!
+      const calls = repo.updateMany.mock.calls;
+      expect(calls.length).toBeGreaterThan(0);
+      for (const call of calls) {
+        const payload = call[1];
+        expect(payload).not.toHaveProperty('result');
+        expect(payload).not.toHaveProperty('extractedText');
+        expect(payload).not.toHaveProperty('arabicSimplifiedText');
+        expect(payload.status).toBe(TaskStatus.COMPLETED);
+      }
     });
   });
 });

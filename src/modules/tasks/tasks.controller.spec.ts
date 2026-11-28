@@ -6,6 +6,7 @@ import { TasksService } from './tasks.service';
 import { TaskExecution } from '../../database/entities/task-execution.entity';
 import { TaskStatus } from './enums/task-status.enum';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { RedisTaskState } from './interfaces/redis-task-state.interface';
 
 describe('TasksController', () => {
   let controller: TasksController;
@@ -19,7 +20,7 @@ describe('TasksController', () => {
   const mockTaskId = '22222222-2222-2222-2222-222222222222';
   const mockClientTaskId = '33333333-3333-3333-3333-333333333333';
 
-  const createMockTask = (
+  const createMockTaskEntity = (
     overrides: Partial<TaskExecution> = {},
   ): TaskExecution => {
     const task = new TaskExecution();
@@ -35,6 +36,24 @@ describe('TasksController', () => {
     task.completedAt = null;
     return Object.assign(task, overrides);
   };
+
+  const createMockRedisState = (
+    overrides: Partial<RedisTaskState> = {},
+  ): RedisTaskState => ({
+    id: mockTaskId,
+    userId: mockUserId,
+    clientTaskId: mockClientTaskId,
+    requestId: '44444444-4444-4444-4444-444444444444',
+    taskType: 'OCR_DOCUMENT',
+    status: TaskStatus.PENDING,
+    processingTimeMs: null,
+    errorCode: null,
+    result: null,
+    createdAt: '2026-11-22T10:00:00.000Z',
+    completedAt: null,
+    expiresAt: Math.floor(Date.now() / 1000) + 7200,
+    ...overrides,
+  });
 
   beforeEach(() => {
     service = {
@@ -57,7 +76,7 @@ describe('TasksController', () => {
     };
 
     it('should return 201 Created when a new task is created', async () => {
-      const task = createMockTask();
+      const task = createMockTaskEntity();
       service.createOrGet.mockResolvedValueOnce({ task, created: true });
 
       const mockRes = {
@@ -75,7 +94,7 @@ describe('TasksController', () => {
     });
 
     it('should return 200 OK when task already exists (duplicate idempotent request)', async () => {
-      const task = createMockTask();
+      const task = createMockTaskEntity();
       service.createOrGet.mockResolvedValueOnce({ task, created: false });
 
       const mockRes = {
@@ -90,33 +109,45 @@ describe('TasksController', () => {
     });
   });
 
-  describe('findOne', () => {
-    it('should return task response for user', async () => {
-      const task = createMockTask();
-      service.getForUser.mockResolvedValueOnce(task);
+  describe('findOne (Polling from Redis)', () => {
+    it('should return task response from Redis state including status and result', async () => {
+      const redisState = createMockRedisState({
+        status: TaskStatus.COMPLETED,
+        result: {
+          extractedText: 'Prescription',
+          confidence: 0.95,
+        },
+        completedAt: '2026-11-22T10:00:05.000Z',
+      });
+      service.getForUser.mockResolvedValueOnce(redisState);
 
       const result = await controller.findOne(mockUserId, mockTaskId);
 
       expect(service.getForUser).toHaveBeenCalledWith(mockUserId, mockTaskId);
       expect(result.id).toBe(mockTaskId);
-      expect(result.status).toBe(TaskStatus.PENDING);
+      expect(result.status).toBe(TaskStatus.COMPLETED);
+      expect(result.result).toEqual({
+        extractedText: 'Prescription',
+        confidence: 0.95,
+      });
+      expect(result.completedAt).toEqual(new Date('2026-11-22T10:00:05.000Z'));
     });
   });
 
-  describe('cancel', () => {
-    it('should cancel task and return task response', async () => {
-      const task = createMockTask({
+  describe('cancel (Cancellation in Redis)', () => {
+    it('should cancel task and return task response from Redis state', async () => {
+      const redisState = createMockRedisState({
         status: TaskStatus.CANCELLED,
-        completedAt: new Date('2026-11-22T10:05:00Z'),
+        completedAt: '2026-11-22T10:05:00.000Z',
       });
-      service.cancel.mockResolvedValueOnce(task);
+      service.cancel.mockResolvedValueOnce(redisState);
 
       const result = await controller.cancel(mockUserId, mockTaskId);
 
       expect(service.cancel).toHaveBeenCalledWith(mockUserId, mockTaskId);
       expect(result.id).toBe(mockTaskId);
       expect(result.status).toBe(TaskStatus.CANCELLED);
-      expect(result.completedAt).toEqual(task.completedAt);
+      expect(result.completedAt).toEqual(new Date('2026-11-22T10:05:00.000Z'));
     });
   });
 });

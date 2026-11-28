@@ -58,16 +58,20 @@ export class TasksController {
   @ApiOperation({
     summary: 'Get task execution details',
     description:
-      'Retrieves the status, execution metadata, and timings for a task belonging to the authenticated user.',
+      'Retrieves the status, temporary results, execution metadata, and timings for a task belonging to the authenticated user from Redis (2-hour TTL). Never falls back to persistent storage.',
   })
   @ApiOkEnvelope(TaskResponseDto)
-  @ApiErrorExamples(AppErrorCode.UNAUTHORIZED, AppErrorCode.NOT_FOUND)
+  @ApiErrorExamples(
+    AppErrorCode.UNAUTHORIZED,
+    AppErrorCode.NOT_FOUND,
+    AppErrorCode.SERVICE_UNAVAILABLE,
+  )
   async findOne(
     @CurrentUserId() userId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TaskResponseDto> {
     const task = await this.tasksService.getForUser(userId, id);
-    return TaskResponseDto.fromEntity(task);
+    return TaskResponseDto.fromRedisState(task);
   }
 
   @Post(':id/cancel')
@@ -75,19 +79,20 @@ export class TasksController {
   @ApiOperation({
     summary: 'Cancel task execution',
     description:
-      'Cancels an active task execution. Safe to repeat if already cancelled. Returns 400 Bad Request if task is completed or failed.',
+      'Atomically cancels an active task execution in Redis. Safe to repeat if already cancelled. Returns 400 Bad Request if task is completed or failed. Note: cancellation sets the authoritative task state to CANCELLED and prevents future result commits; because the current OCR implementation is synchronous mock-based without a background worker queue, no underlying OS process termination is performed.',
   })
   @ApiOkEnvelope(TaskResponseDto)
   @ApiErrorExamples(
     AppErrorCode.UNAUTHORIZED,
     AppErrorCode.NOT_FOUND,
     AppErrorCode.BAD_REQUEST,
+    AppErrorCode.SERVICE_UNAVAILABLE,
   )
   async cancel(
     @CurrentUserId() userId: string,
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<TaskResponseDto> {
     const task = await this.tasksService.cancel(userId, id);
-    return TaskResponseDto.fromEntity(task);
+    return TaskResponseDto.fromRedisState(task);
   }
 }
